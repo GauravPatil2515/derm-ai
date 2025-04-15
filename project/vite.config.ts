@@ -4,6 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/derm-ai/', // Add base URL for GitHub Pages
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
