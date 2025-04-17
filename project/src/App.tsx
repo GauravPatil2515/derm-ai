@@ -12,7 +12,7 @@ function App() {
   return (
     <ServiceProvider>
       <ToastProvider>
-        <Router>
+        <Router basename="/derm-ai">
           <div className="min-h-screen bg-pink-50/30">
             <Navbar />
             <Routes>

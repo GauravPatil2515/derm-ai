@@ -11,6 +11,7 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isHealthy } = useService();
 
@@ -89,7 +90,10 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
     if (!selectedFile) return;
 
     try {
+      setIsUploading(true);
+      setError(null);
       await onUpload(selectedFile);
+      
       // Reset form after successful upload
       setSelectedFile(null);
       setPreview(null);
@@ -97,7 +101,11 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
         inputRef.current.value = '';
       }
     } catch (err) {
-      setError('Failed to analyze image. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to analyze image. Please try again.';
+      setError(errorMessage);
+      console.error('Upload error:', err);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -130,13 +138,15 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
         className={`relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
           dragActive
             ? 'border-pink-400 bg-pink-50'
+            : isUploading
+            ? 'border-pink-300 bg-pink-50'
             : 'border-pink-200 hover:border-pink-300'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => !isUploading && inputRef.current?.click()}
       >
         <input
           ref={inputRef}
@@ -144,20 +154,22 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
           className="hidden"
           onChange={handleChange}
           accept="image/png, image/jpeg"
-          disabled={!isHealthy}
+          disabled={!isHealthy || isUploading}
         />
 
         {preview ? (
           <div className="relative w-full p-4">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemove();
-              }}
-              className="absolute right-6 top-6 z-10 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            {!isUploading && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove();
+                }}
+                className="absolute right-6 top-6 z-10 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
             <img
               src={preview}
               alt="Preview"
@@ -168,18 +180,30 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
           <div className="flex flex-col items-center justify-center py-8">
             <Upload className="mb-4 h-8 w-8 text-pink-400" />
             <p className="mb-2 text-sm text-pink-600">
-              Drag and drop your image here, or click to select
+              {isUploading 
+                ? 'Uploading and analyzing your image...'
+                : 'Drag and drop your image here, or click to select'
+              }
             </p>
             <p className="text-xs text-pink-400">Supports: JPEG, PNG (max 10MB)</p>
           </div>
         )}
+
+        {isUploading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+            <div className="flex flex-col items-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-500 border-t-transparent"></div>
+              <p className="mt-2 text-sm text-pink-600">Analyzing image...</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {selectedFile && (
+      {selectedFile && !isUploading && (
         <div className="mt-4 flex justify-end">
           <button
             onClick={handleSubmit}
-            disabled={!isHealthy}
+            disabled={!isHealthy || isUploading}
             className="rounded-lg bg-pink-500 px-4 py-2 text-white hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Analyze Image

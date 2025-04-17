@@ -8,6 +8,7 @@ import os
 import json
 import time
 import logging
+import stat
 from logging.handlers import RotatingFileHandler
 from pythonjsonlogger import jsonlogger
 from api.skin_analysis import DermatologyAnalyzer, db, ChatMessage, SkinAnalysisResult
@@ -84,7 +85,7 @@ db.init_app(app)
 # Configure CORS
 CORS(app, resources={
     r"/*": {  # Allow all routes
-        "origins": ["http://localhost:5176"],
+        "origins": ["http://localhost:5176", "http://localhost:5177"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
         "expose_headers": ["Content-Range", "X-Content-Range"],
@@ -182,10 +183,45 @@ def create_image_preview(file_path, max_size=(800, 800)):
         logger.error(f"Error creating image preview: {str(e)}")
         return None
 
+def ensure_upload_dir():
+    """Ensure upload directory exists and has proper permissions"""
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        try:
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            # Set directory permissions to 755 (rwxr-xr-x)
+            os.chmod(app.config['UPLOAD_FOLDER'], 
+                    stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | 
+                    stat.S_IRGRP | stat.S_IXGRP | 
+                    stat.S_IROTH | stat.S_IXOTH)
+            logger.info(f"Created upload directory at {app.config['UPLOAD_FOLDER']}")
+        except Exception as e:
+            logger.error(f"Failed to create upload directory: {str(e)}")
+            raise RuntimeError(f"Failed to create upload directory: {str(e)}")
+
+    # Verify directory permissions
+    if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
+        error_msg = f"Upload directory {app.config['UPLOAD_FOLDER']} is not writable"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+
+    # Test file creation
+    test_file = os.path.join(app.config['UPLOAD_FOLDER'], '.test')
+    try:
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+    except Exception as e:
+        logger.error(f"Failed to write test file: {str(e)}")
+        raise RuntimeError(f"Upload directory not writable: {str(e)}")
+
 @app.route('/api/analyze', methods=['POST'])
 @limiter.limit("10 per minute")
 def analyze_image():
+    """Handle image upload and analysis"""
     try:
+        # Ensure upload directory exists and is writable
+        ensure_upload_dir()
+        
         if 'image' not in request.files:
             return jsonify({'success': False, 'error': 'No image file provided'}), 400
         
@@ -195,22 +231,32 @@ def analyze_image():
         if file.filename == '':
             return jsonify({'success': False, 'error': 'No selected file'}), 400
         
-        # Check file type
         if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            return jsonify({'success': False, 'error': 'Invalid file type'}), 400
+            return jsonify({'success': False, 'error': 'Invalid file type. Only PNG and JPEG files are allowed'}), 400
 
-        # Save and validate file
-        filename = secure_filename(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}")
+        # Generate secure filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = secure_filename(f"{timestamp}_{file.filename}")
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         
         try:
+            # Save and validate file
             file.save(filepath)
-            is_valid, error_msg = validate_image(filepath)
             
+            # Set proper file permissions (644 - rw-r--r--)
+            os.chmod(filepath, 
+                    stat.S_IRUSR | stat.S_IWUSR | 
+                    stat.S_IRGRP | 
+                    stat.S_IROTH)
+            
+            is_valid, error_msg = validate_image(filepath)
             if not is_valid:
                 os.remove(filepath)
                 return jsonify({'success': False, 'error': error_msg}), 400
-                
+
+            # Create preview before analysis
+            preview = create_image_preview(filepath)
+            
             # Analyze image
             result = analyzer.analyze_image(filepath)
             
@@ -226,8 +272,10 @@ def analyze_image():
             db.session.add(analysis)
             db.session.commit()
             
-            # Add analysis ID to result
+            # Add analysis ID and preview to result
             result['id'] = str(analysis.id)
+            if preview:
+                result['image_preview'] = preview
             
             return jsonify({
                 'success': True,
@@ -236,15 +284,14 @@ def analyze_image():
             })
             
         except Exception as e:
+            # Clean up on error
             if os.path.exists(filepath):
-                os.remove(filepath)
+                try:
+                    os.remove(filepath)
+                except Exception as del_e:
+                    logger.error(f"Failed to delete file after error: {str(del_e)}")
             raise e
             
-        finally:
-            # Clean up temporary files
-            if os.path.exists(filepath):
-                os.remove(filepath)
-                
     except Exception as e:
         logger.error(f"Error analyzing image: {str(e)}", exc_info=True)
         return jsonify({
@@ -314,36 +361,42 @@ def health_check():
 @app.route('/api/analysis/history', methods=['GET'])
 def get_analysis_history():
     try:
-        user_id = request.args.get('user_id')
-        if not user_id:
-            return jsonify({
-                "success": False,
-                "error": "Missing required parameter: user_id",
-                "timestamp": datetime.utcnow().isoformat()
-            }), 400
-
+        user_id = request.args.get('user_id', 'anonymous')
         analyses = SkinAnalysisResult.query.filter_by(user_id=user_id).order_by(SkinAnalysisResult.timestamp.desc()).all()
-        history = [{
-            "id": str(analysis.id),
-            "timestamp": analysis.timestamp.isoformat(),
-            "primary_condition": analysis.primary_condition,
-            "confidence": analysis.confidence,
-            "detailed_analysis": json.loads(analysis.detailed_analysis)
-        } for analysis in analyses]
-
+        
+        history = []
+        for analysis in analyses:
+            result = {
+                'id': str(analysis.id),
+                'timestamp': analysis.timestamp.isoformat(),
+                'primary_condition': analysis.primary_condition,
+                'confidence': analysis.confidence,
+                'detailed_analysis': json.loads(analysis.detailed_analysis)
+            }
+            
+            # Add image preview if available
+            try:
+                if os.path.exists(analysis.image_path):
+                    preview = create_image_preview(analysis.image_path)
+                    if preview:
+                        result['image_preview'] = preview
+            except Exception as e:
+                logger.warning(f"Failed to create image preview: {e}")
+            
+            history.append(result)
+        
         return jsonify({
-            "success": True,
-            "history": history,
-            "user_id": user_id,
-            "timestamp": datetime.utcnow().isoformat()
+            'success': True,
+            'history': history,
+            'timestamp': datetime.utcnow().isoformat()
         })
-
+        
     except Exception as e:
-        logger.error(f"Error retrieving analysis history: {e}")
+        logger.error(f"Error fetching analysis history: {e}", exc_info=True)
         return jsonify({
-            "success": False,
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
         }), 500
 
 @app.route('/api/analysis/delete', methods=['POST'])
@@ -480,6 +533,16 @@ def get_analysis_details(analysis_id):
                 "timestamp": datetime.utcnow().isoformat()
             }), 400
 
+        try:
+            # Convert string ID to integer
+            analysis_id = int(analysis_id)
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "error": "Invalid analysis ID format",
+                "timestamp": datetime.utcnow().isoformat()
+            }), 400
+
         analysis = SkinAnalysisResult.query.filter_by(
             id=analysis_id,
             user_id=user_id
@@ -498,13 +561,21 @@ def get_analysis_details(analysis_id):
             "primary_condition": analysis.primary_condition,
             "confidence": analysis.confidence,
             "detailed_analysis": json.loads(analysis.detailed_analysis),
+            "report_metadata": {
+                "timestamp": analysis.timestamp.isoformat()
+            },
+            "primary_analysis": {
+                "condition": analysis.primary_condition,
+                "confidence": analysis.confidence
+            }
         }
 
         # Try to get the image preview if it exists
         try:
-            image_preview = create_image_preview(analysis.image_path)
-            if image_preview:
-                result["image_preview"] = image_preview
+            if os.path.exists(analysis.image_path):
+                image_preview = create_image_preview(analysis.image_path)
+                if image_preview:
+                    result["image_preview"] = image_preview
         except Exception as e:
             logger.warning(f"Failed to create image preview: {e}")
 
@@ -515,7 +586,7 @@ def get_analysis_details(analysis_id):
         })
 
     except Exception as e:
-        logger.error(f"Error retrieving analysis details: {e}")
+        logger.error(f"Error retrieving analysis details: {e}", exc_info=True)
         return jsonify({
             "success": False,
             "error": str(e),
@@ -622,10 +693,17 @@ def start_scheduler():
     scheduler.start()
     logger.info("Background scheduler started")
 
+# Initialize upload directory on startup
+try:
+    ensure_upload_dir()
+except Exception as e:
+    logger.error(f"Failed to initialize upload directory: {str(e)}")
+    # Continue running the app, will try to create directory on demand
+
 if __name__ == '__main__':
     if init_app():
         start_scheduler()  # Start the background scheduler
-        app.run(debug=True, port=5001)
+        app.run(debug=True, port=5002)
     else:
         logger.error("Failed to initialize application. Exiting...")
         exit(1)

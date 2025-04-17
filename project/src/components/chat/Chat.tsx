@@ -10,6 +10,41 @@ interface Message {
   timestamp: string;
 }
 
+const formatMessage = (content: string) => {
+  // Split into sections based on **Title** pattern
+  const sections = content.split(/\*\*(.*?)\*\*/).filter(Boolean);
+  
+  return sections.map((section, index) => {
+    if (index % 2 === 0) { // Content
+      return (
+        <div key={index} className="mt-2 space-y-2">
+          {section.split('\n').map((line, lineIndex) => {
+            // Check if line is a bullet point
+            if (line.trim().startsWith('•')) {
+              return (
+                <div key={lineIndex} className="flex items-start gap-2">
+                  <span className="mt-1.5 text-pink-500">•</span>
+                  <span className="text-gray-700">{line.trim().substring(1).trim()}</span>
+                </div>
+              );
+            }
+            // Regular text
+            return line.trim() && (
+              <p key={lineIndex} className="text-gray-700">{line.trim()}</p>
+            );
+          })}
+        </div>
+      );
+    } else { // Section title
+      return (
+        <h3 key={index} className="mt-4 font-medium text-lg text-pink-800 first:mt-0">
+          {section.trim()}
+        </h3>
+      );
+    }
+  });
+};
+
 export function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -162,7 +197,7 @@ export function Chat() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {messages.map(message => (
               <div
                 key={message.id}
@@ -172,7 +207,9 @@ export function Chat() {
               >
                 <div
                   className={`rounded-full p-2 ${
-                    message.role === 'assistant' ? 'bg-pink-100' : 'bg-pink-500'
+                    message.role === 'assistant' 
+                      ? 'bg-gradient-to-br from-pink-100 to-pink-200' 
+                      : 'bg-pink-500'
                   }`}
                 >
                   {message.role === 'assistant' ? (
@@ -182,13 +219,16 @@ export function Chat() {
                   )}
                 </div>
                 <div
-                  className={`rounded-lg px-4 py-2 ${
+                  className={`flex-1 rounded-lg px-4 py-3 ${
                     message.role === 'assistant'
-                      ? 'bg-pink-50 text-gray-800'
+                      ? 'bg-pink-50/80 text-gray-800'
                       : 'bg-pink-500 text-white'
                   }`}
                 >
-                  {message.content}
+                  {message.role === 'assistant' 
+                    ? formatMessage(message.content)
+                    : <p>{message.content}</p>
+                  }
                 </div>
               </div>
             ))}

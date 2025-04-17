@@ -103,12 +103,29 @@ class DermatologyAnalyzer:
         self.api_key = os.getenv('GROQ_API_KEY', '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')
         self.groq_client = Groq(api_key=self.api_key)
 
-        # Define class names
+        # Define class names with common names and scientific references
         self.class_names = (
-            'BA-cellulitis', 'BA-impetigo', 'FU-athlete-foot',
-            'FU-nail-fungus', 'FU-ringworm', 'PA-cutaneous-larva-migrans',
-            'VI-chickenpox', 'VI-shingles'
+            'Bacterial Cellulitis',  # BA-cellulitis
+            'Bacterial Impetigo',    # BA-impetigo
+            'Athletes Foot',         # FU-athlete-foot
+            'Nail Fungus',          # FU-nail-fungus
+            'Ringworm',             # FU-ringworm
+            'Creeping Eruption',    # PA-cutaneous-larva-migrans
+            'Chickenpox',           # VI-chickenpox
+            'Shingles'              # VI-shingles
         )
+
+        # Define mapping between common names and scientific codes
+        self.condition_codes = {
+            'Bacterial Cellulitis': 'BA-cellulitis',
+            'Bacterial Impetigo': 'BA-impetigo',
+            'Athletes Foot': 'FU-athlete-foot',
+            'Nail Fungus': 'FU-nail-fungus',
+            'Ringworm': 'FU-ringworm',
+            'Creeping Eruption': 'PA-cutaneous-larva-migrans',
+            'Chickenpox': 'VI-chickenpox',
+            'Shingles': 'VI-shingles'
+        }
 
         self.model = None
         self._initialize_model()

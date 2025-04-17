@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, Calendar, Clock, MessageSquare, Search, Download, ExternalLink } from 'lucide-react';
+import { Video, Calendar, Clock, MessageSquare, Search, Download, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { DashboardCard } from './DashboardCard';
 import { Link } from 'react-router-dom';
 import { useService } from '../../lib/ServiceContext';
@@ -11,6 +11,7 @@ interface SkinAnalysis {
   primary_condition: string;
   confidence: number;
   detailed_analysis: any;
+  image_preview?: string;
 }
 
 interface DashboardStats {
@@ -196,6 +197,7 @@ export function Dashboard() {
               <table className="min-w-full divide-y divide-pink-200">
                 <thead className="bg-pink-50">
                   <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Image</th>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Report ID</th>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Date</th>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Condition</th>
@@ -207,6 +209,21 @@ export function Dashboard() {
                 <tbody className="divide-y divide-pink-100 bg-white">
                   {filteredAnalyses.map((analysis) => (
                     <tr key={analysis.id} className="hover:bg-pink-50/50">
+                      <td className="px-6 py-4">
+                        {analysis.image_preview ? (
+                          <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-pink-100">
+                            <img
+                              src={`data:image/jpeg;base64,${analysis.image_preview}`}
+                              alt="Skin condition"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-pink-100 bg-pink-50">
+                            <ImageIcon className="h-6 w-6 text-pink-300" />
+                          </div>
+                        )}
+                      </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         <span className="font-medium text-pink-900">{analysis.id}</span>
                       </td>

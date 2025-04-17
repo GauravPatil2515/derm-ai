@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Heart, WifiOff } from 'lucide-react';
+import { AlertCircle, WifiOff } from 'lucide-react';
 import { SkinScanUpload } from './SkinScanUpload';
 import { useService } from '../../lib/ServiceContext';
 import { useToast } from '../../lib/ToastContext';
@@ -24,15 +24,27 @@ export function SkinScan() {
         const response = await fetch(`${API_BASE_URL}/api/health`);
         const data = await response.json();
         setIsBackendConnected(data.status === 'healthy');
+        
+        // Additional health check feedback
+        if (!data.model_loaded) {
+          addToast('Analysis model is initializing. Please wait...', 'info');
+        }
+        if (!data.database_connected) {
+          addToast('Database connection issues. Some features may be limited.', 'error');
+        }
+        if (!data.upload_folder) {
+          addToast('Storage system is initializing. Please wait...', 'info');
+        }
       } catch (err) {
         setIsBackendConnected(false);
+        addToast('Unable to connect to analysis service', 'error');
       }
     };
 
     checkBackendHealth();
     const interval = setInterval(checkBackendHealth, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [addToast]);
 
   const handleAnalysis = async (file: File) => {
     if (!isHealthy || !isBackendConnected) {
@@ -51,28 +63,49 @@ export function SkinScan() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), UPLOAD_TIMEOUT);
 
-      const response = await fetch(`${API_BASE_URL}/api/analyze`, {
-        method: 'POST',
-        body: formData,
-        signal: controller.signal
-      });
+      let retryCount = 0;
+      let success = false;
 
-      clearTimeout(timeoutId);
+      while (retryCount < MAX_RETRIES && !success) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal
+          });
 
-      const data = await response.json();
-      
-      if (!response.ok || !data.result) {
-        throw new Error(data.error || 'Failed to analyze image');
-      }
+          clearTimeout(timeoutId);
 
-      addToast('Analysis completed successfully', 'success');
-      
-      // Navigate to the details page if we have an analysis ID
-      if (data.result.id) {
-        navigate(`/scan/${data.result.id}`);
-      } else {
-        // If no ID, navigate to dashboard
-        navigate('/dashboard');
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to analyze image');
+          }
+
+          const data = await response.json();
+          
+          if (!data.success || !data.result) {
+            throw new Error(data.error || 'Failed to analyze image');
+          }
+
+          addToast('Analysis completed successfully', 'success');
+          
+          // Navigate to the details page if we have an analysis ID
+          if (data.result.id) {
+            navigate(`/scan/${data.result.id}`);
+            success = true;
+          } else {
+            throw new Error('No analysis ID returned');
+          }
+        } catch (err) {
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            addToast(`Retrying analysis (attempt ${retryCount + 1})...`, 'info');
+          } else {
+            throw err;
+          }
+        }
       }
       
     } catch (err) {

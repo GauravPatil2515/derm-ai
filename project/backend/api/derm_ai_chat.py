@@ -103,21 +103,44 @@ class DermAI:
             raise
 
     def _format_prompt(self, user_input: str) -> str:
-        try:
-            formatted_prompt = f"""As a dermatology AI assistant, provide helpful information about the following skin-related query. 
-            Remember to:
-            1. Stay within medical information boundaries
-            2. Encourage consultation with healthcare providers
-            3. Provide general educational information only
-            4. Include relevant skincare best practices
+        return f"""As a dermatology AI assistant, provide a clear and structured response to the following query.
 
-            User Query: {user_input}
-            """
-            logger.debug(f"Formatted prompt: {formatted_prompt}")
-            return formatted_prompt
-        except Exception as e:
-            logger.error(f"Error formatting prompt: {str(e)}", exc_info=True)
-            raise
+Format Requirements:
+1. Break your response into clear sections using "**Section Title**" format
+2. Use bullet points (•) for lists
+3. Keep each section focused and concise
+4. Use line breaks between sections for readability
+5. Start with a brief greeting/introduction
+
+Structure your response like this:
+**Introduction**
+Brief welcoming response to the query
+
+**Key Information**
+• Point 1
+• Point 2
+• Point 3
+
+**Details & Explanation**
+Clear, focused paragraphs with important information
+
+**Recommendations**
+• Action item 1
+• Action item 2
+• Action item 3
+
+**Important Notes**
+• Any warnings or special considerations
+• When to seek medical help
+
+Remember to:
+1. Stay within medical information boundaries
+2. Encourage consultation with healthcare providers
+3. Use simple, clear language
+4. Be precise and concise
+
+User Query: {user_input}
+"""
 
     def _get_user_history(self, user_id: str) -> List:
         """Get chat history from database"""

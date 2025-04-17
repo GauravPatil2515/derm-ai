@@ -2,11 +2,12 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/derm-ai/', // Add base URL for GitHub Pages
-  optimizeDeps: {
-    exclude: ['lucide-react'],
+  base: '/derm-ai/',
+  build: {
+    outDir: 'dist',
   },
   server: {
     port: 5176,
