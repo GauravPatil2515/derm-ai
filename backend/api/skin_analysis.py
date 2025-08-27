@@ -99,7 +99,9 @@ class DermatologyAnalyzer:
         logger.info(f"Using device: {self.device}")
         
         # Initialize Groq client with API key from environment variable
-        self.api_key = os.getenv('GROQ_API_KEY', '')
+        self.api_key = os.getenv('GROQ_API_KEY')
+        if not self.api_key:
+            raise ValueError("GROQ_API_KEY environment variable is not set")
         self.groq_client = Groq(api_key=self.api_key)
 
         # Load model first to get the correct class mapping
