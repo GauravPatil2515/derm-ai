@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermAI Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🧪 DermAI Frontend-Backend Connection Test</h1>
+    <p>This page tests the connection between frontend and backend services.</p>
+    
+    <div id="status">
+        <div class="info">Click "Run Tests" to check connectivity...</div>
+    </div>
+    
+    <button onclick="runConnectivityTests()">Run Tests</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:5002';
+        const statusDiv = document.getElementById('status');
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            statusDiv.appendChild(div);
+        }
+        
+        function clearResults() {
+            statusDiv.innerHTML = '<div class="info">Click "Run Tests" to check connectivity...</div>';
+        }
+        
+        async function testEndpoint(name, url, expectedFields = []) {
+            try {
+                addResult(`🔄 Testing ${name}...`, 'info');
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Check if expected fields are present
+                const missingFields = expectedFields.filter(field => !(field in data));
+                
+                if (missingFields.length > 0) {
+                    addResult(`⚠️ ${name}: Missing fields: ${missingFields.join(', ')}`, 'error');
+                } else {
+                    addResult(`✅ ${name}: SUCCESS - ${JSON.stringify(data, null, 2)}`, 'success');
+                }
+                
+                return { success: true, data };
+                
+            } catch (error) {
+                addResult(`❌ ${name}: FAILED - ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function runConnectivityTests() {
+            clearResults();
+            addResult('🚀 Starting DermAI Connectivity Tests...', 'info');
+            
+            // Test backend health
+            await testEndpoint(
+                'Backend Health Check', 
+                `${API_BASE_URL}/api/health`,
+                ['status', 'model_loaded', 'database_connected', 'upload_folder']
+            );
+            
+            // Test chat health
+            await testEndpoint(
+                'Chat Health Check', 
+                `${API_BASE_URL}/api/chat/health`,
+                ['status', 'success']
+            );
+            
+            // Test analysis history
+            await testEndpoint(
+                'Analysis History', 
+                `${API_BASE_URL}/api/analysis/history?user_id=test`,
+                ['success', 'history']
+            );
+            
+            // Test model status
+            await testEndpoint(
+                'Model Status', 
+                `${API_BASE_URL}/api/model-status`,
+                ['status']
+            );
+            
+            addResult('🎯 All connectivity tests completed!', 'info');
+        }
+        
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runConnectivityTests, 1000);
+        });
+    </script>
+</body>
+</html>
