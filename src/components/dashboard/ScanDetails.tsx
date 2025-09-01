@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { FileText, ThermometerSun, Pill, Shield, AlertTriangle, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { FileText, ThermometerSun, Pill, Shield, AlertTriangle, ExternalLink, Image as ImageIcon, Eye, Brain } from 'lucide-react';
 import { API_BASE_URL } from '../../lib/config';
 import { useToast } from '../../lib/ToastContext';
 import { DISEASE_INFO } from '../../lib/utils';
@@ -30,6 +30,7 @@ export function ScanDetails() {
   const [analysis, setAnalysis] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [showGradCAM, setShowGradCAM] = React.useState(false);
   const { addToast } = useToast();
   const userId = localStorage.getItem('chatUserId') || 'anonymous';
 
@@ -158,31 +159,128 @@ export function ScanDetails() {
               </div>
             </div>
 
-            {/* Add Image Display Section */}
+            {/* Add Image Display Section with Grad-CAM */}
             {analysis.image_preview && (
               <div className="mt-6 rounded-lg border border-pink-100 p-4">
-                <div className="mb-3 flex items-center gap-2">
-                  <ImageIcon className="h-5 w-5 text-pink-600" />
-                  <h3 className="text-lg font-medium text-pink-800">Analyzed Image</h3>
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-pink-600" />
+                    <h3 className="text-lg font-medium text-pink-800">Analyzed Image</h3>
+                  </div>
+                  {analysis.visual_explanation?.gradcam_available && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowGradCAM(false)}
+                        className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
+                          !showGradCAM
+                            ? 'bg-pink-600 text-white'
+                            : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+                        }`}
+                      >
+                        <Eye className="h-4 w-4" />
+                        Original
+                      </button>
+                      <button
+                        onClick={() => setShowGradCAM(true)}
+                        className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
+                          showGradCAM
+                            ? 'bg-pink-600 text-white'
+                            : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+                        }`}
+                      >
+                        <Brain className="h-4 w-4" />
+                        AI Focus
+                      </button>
+                    </div>
+                  )}
                 </div>
+                
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-pink-50">
-                  <img
-                    src={`data:image/jpeg;base64,${analysis.image_preview}`}
-                    alt="Analyzed skin condition"
-                    className="mx-auto h-full object-contain"
-                    onError={(e) => {
-                      console.error("Image failed to load");
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      const parent = (e.target as HTMLImageElement).parentElement;
-                      if (parent) {
-                        const errorMsg = document.createElement('div');
-                        errorMsg.className = 'text-center py-12 text-pink-600';
-                        errorMsg.textContent = 'Image could not be loaded';
-                        parent.appendChild(errorMsg);
-                      }
-                    }}
-                  />
+                  {!showGradCAM ? (
+                    <img
+                      src={`data:image/jpeg;base64,${analysis.image_preview}`}
+                      alt="Analyzed skin condition"
+                      className="mx-auto h-full object-contain"
+                      onError={(e) => {
+                        console.error("Image failed to load");
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const parent = (e.target as HTMLImageElement).parentElement;
+                        if (parent) {
+                          const errorMsg = document.createElement('div');
+                          errorMsg.className = 'text-center py-12 text-pink-600';
+                          errorMsg.textContent = 'Image could not be loaded';
+                          parent.appendChild(errorMsg);
+                        }
+                      }}
+                    />
+                  ) : analysis.visual_explanation?.explanation_image_base64 ? (
+                    <img
+                      src={`data:image/png;base64,${analysis.visual_explanation.explanation_image_base64}`}
+                      alt="Grad-CAM visual explanation"
+                      className="mx-auto h-full object-contain"
+                      onError={(e) => {
+                        console.error("Grad-CAM image failed to load");
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const parent = (e.target as HTMLImageElement).parentElement;
+                        if (parent) {
+                          const errorMsg = document.createElement('div');
+                          errorMsg.className = 'text-center py-12 text-pink-600';
+                          errorMsg.textContent = 'Grad-CAM visualization could not be loaded';
+                          parent.appendChild(errorMsg);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-pink-600">
+                      <div className="text-center">
+                        <Brain className="mx-auto h-12 w-12 text-pink-300" />
+                        <p className="mt-2">Visual explanation not available</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
+                
+                {/* Grad-CAM Explanation Text */}
+                {showGradCAM && analysis.visual_explanation?.explanation_text && (
+                  <div className="mt-4 rounded-lg bg-blue-50 p-4">
+                    <h4 className="mb-2 font-medium text-blue-800">Visual Analysis Explanation</h4>
+                    <div className="text-sm text-blue-700">
+                      {analysis.visual_explanation.explanation_text.split('\n\n').map((paragraph: string, index: number) => (
+                        <p key={index} className="mb-2 last:mb-0">
+                          {paragraph.startsWith('**') && paragraph.endsWith('**') ? (
+                            <span className="font-semibold">{paragraph.slice(2, -2)}</span>
+                          ) : (
+                            paragraph
+                          )}
+                        </p>
+                      ))}
+                    </div>
+                    
+                    {/* Heatmap Statistics */}
+                    {analysis.visual_explanation?.heatmap_stats && (
+                      <div className="mt-3 grid grid-cols-3 gap-4 border-t border-blue-200 pt-3">
+                        <div className="text-center">
+                          <p className="text-xs text-blue-600">Max Activation</p>
+                          <p className="font-medium text-blue-800">
+                            {(analysis.visual_explanation.heatmap_stats.max_activation * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-blue-600">Avg Activation</p>
+                          <p className="font-medium text-blue-800">
+                            {(analysis.visual_explanation.heatmap_stats.mean_activation * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-blue-600">Focus Area</p>
+                          <p className="font-medium text-blue-800">
+                            {analysis.visual_explanation.heatmap_stats.focus_area_percentage.toFixed(1)}%
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

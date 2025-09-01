@@ -1,4 +1,17 @@
-# DermAI - AI-Powered Skin Analysis Platform
+# DermAI - AI-Po## 🚀 Features
+
+### Core AI Features
+- **Advanced Skin Analysis**: 8-class skin condition detection using Vision Transformer (ViT)
+- **Visual Explanations**: Grad-CAM heatmaps showing which areas influenced the diagnosis
+- **AI Chat Assistant**: Groq-powered dermatology consultations
+- **Real-time Processing**: Analysis results in under 2 seconds
+- **Confidence Scoring**: Detailed confidence metrics with uncertainty quantification
+
+### Visual Explanation Technology
+- **Grad-CAM Integration**: See exactly which skin features the AI focused on
+- **Interactive Visualizations**: Toggle between original image and attention heatmaps
+- **Detailed Analysis**: Statistics on focus areas and activation patterns
+- **Educational Value**: Learn about visual symptoms through AI explanationsis Platform
 
 <div align="center">
 

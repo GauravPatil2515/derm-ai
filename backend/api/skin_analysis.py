@@ -18,6 +18,7 @@ import timm
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from extensions import db
 from models.skin_analysis import SkinAnalysisResult
+from utils.gradcam import GradCAMProcessor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -111,6 +112,16 @@ class DermatologyAnalyzer:
         self._load_model_and_classes()
         self._setup_transformations()
         self._response_cache = {}
+        
+        # Initialize Grad-CAM processor
+        self.gradcam_processor = None
+        if self.model is not None:
+            try:
+                self.gradcam_processor = GradCAMProcessor(self.model)
+                logger.info("Grad-CAM processor initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Grad-CAM processor: {str(e)}")
+                self.gradcam_processor = None
 
     def _load_model_and_classes(self):
         """Load the model and set up class mappings from the saved model"""
@@ -256,11 +267,40 @@ class DermatologyAnalyzer:
             image_tensor = self.transform(image=np.array(image))['image'].unsqueeze(0).to(self.device)
 
             top_prob, top_idx = self._predict_image(image_tensor)
+            
+            # Prepare prediction results for Grad-CAM
+            primary_prediction = {
+                'condition': self.class_names[top_idx[0]],
+                'confidence': top_prob[0].item() * 100,
+                'primary_prediction_idx': top_idx[0].item()
+            }
+            
+            # Generate Grad-CAM explanation if available
+            gradcam_results = {}
+            if self.gradcam_processor is not None:
+                try:
+                    gradcam_results = self.gradcam_processor.process_image_with_explanation(
+                        image_path, image_tensor, primary_prediction
+                    )
+                    logger.info("Grad-CAM explanation generated successfully")
+                except Exception as e:
+                    logger.warning(f"Grad-CAM generation failed: {str(e)}")
+                    gradcam_results = {
+                        'gradcam_available': False,
+                        'error': str(e),
+                        'explanation_text': "Visual explanation temporarily unavailable."
+                    }
+            else:
+                gradcam_results = {
+                    'gradcam_available': False,
+                    'explanation_text': "Visual explanation feature is not available."
+                }
+            
             initial_report = self._generate_initial_report(image_path, top_prob, top_idx)
             enhanced_analysis = self._get_groq_analysis(initial_report)
             sections = self._parse_analysis_sections(enhanced_analysis)
 
-            return {
+            result = {
                 'report_metadata': {
                     'timestamp': datetime.now().isoformat(),
                     'report_id': f"DERM-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
@@ -278,8 +318,11 @@ class DermatologyAnalyzer:
                 'patient_guidance': {
                     'disclaimer': self._get_disclaimer(),
                     'next_steps': self._get_next_steps()
-                }
+                },
+                'visual_explanation': gradcam_results
             }
+            
+            return result
 
         except Exception as e:
             error_msg = f"Error analyzing image: {str(e)}"
