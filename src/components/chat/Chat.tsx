@@ -59,6 +59,7 @@ export function Chat() {
     localStorage.setItem('chatUserId', userId);
     loadChatHistory();
     checkConnection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export function Chat() {
       if (!data.success && !reconnectTimeoutRef.current) {
         reconnectTimeoutRef.current = setTimeout(checkConnection, 5000);
       }
-    } catch (err) {
+    } catch {
       setIsConnected(false);
       if (!reconnectTimeoutRef.current) {
         reconnectTimeoutRef.current = setTimeout(checkConnection, 5000);
@@ -88,9 +89,8 @@ export function Chat() {
       if (data.success) {
         setMessages(data.messages);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load chat history');
-      console.error('Error loading chat history:', err);
     }
   };
 
@@ -109,7 +109,7 @@ export function Chat() {
       content: userMessage,
       timestamp: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, newUserMessage]);
+    setMessages((prev: Message[]) => [...prev, newUserMessage]);
 
     setIsLoading(true);
     try {
@@ -141,7 +141,7 @@ export function Chat() {
         content: data.response,
         timestamp: data.timestamp,
       };
-      setMessages(prev => [...prev, newAssistantMessage]);
+      setMessages((prev: Message[]) => [...prev, newAssistantMessage]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send message');
       console.error('Chat error:', err);
@@ -160,7 +160,7 @@ export function Chat() {
         body: JSON.stringify({ user_id: userId }),
       });
       setMessages([]);
-    } catch (err) {
+    } catch {
       setError('Failed to clear chat history');
     }
   };
@@ -198,7 +198,7 @@ export function Chat() {
           </div>
         ) : (
           <div className="space-y-6">
-            {messages.map(message => (
+            {messages.map((message: Message) => (
               <div
                 key={message.id}
                 className={`flex items-start gap-3 ${

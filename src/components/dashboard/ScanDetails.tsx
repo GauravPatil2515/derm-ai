@@ -25,9 +25,43 @@ interface AnalysisSection {
   description?: string;
 }
 
+interface AnalysisData {
+  id: string;
+  condition: string;
+  confidence: number;
+  timestamp: string;
+  image_preview?: string;
+  primary_analysis?: {
+    condition: string;
+    confidence: number;
+  };
+  report_metadata?: {
+    timestamp: string;
+    report_id: string;
+    analysis_type: string;
+  };
+  visual_explanation?: {
+    gradcam_available: boolean;
+    explanation_image_base64?: string;
+    explanation_text?: string;
+    heatmap_stats?: {
+      max_activation: number;
+      mean_activation: number;
+      focus_area_percentage: number;
+    };
+  };
+  detailed_analysis?: {
+    overview?: string[];
+    symptoms?: string[];
+    treatment?: string[];
+    prevention?: string[];
+    warning?: string[];
+  };
+}
+
 export function ScanDetails() {
   const { id } = useParams();
-  const [analysis, setAnalysis] = React.useState<any>(null);
+  const [analysis, setAnalysis] = React.useState<AnalysisData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [showGradCAM, setShowGradCAM] = React.useState(false);

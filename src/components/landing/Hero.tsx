@@ -17,7 +17,7 @@ export function Hero() {
       const response = await fetch(`${API_BASE_URL}/api/chat/health`);
       const data = await response.json();
       setIsConnected(data.success);
-    } catch (error) {
+    } catch {
       setIsConnected(false);
     }
   };
@@ -32,7 +32,7 @@ export function Hero() {
     if (!isConnected) return;
     setIsLoading(true);
     // Add user message immediately
-    setMessages(prev => [...prev, { role: 'user', content: message }]);
+    setMessages((prev: { role: 'assistant' | 'user'; content: string }[]) => [...prev, { role: 'user', content: message }]);
     
     try {
       const response = await fetch(`${API_BASE_URL}/api/chat/`, {
@@ -48,9 +48,9 @@ export function Hero() {
       
       const data = await response.json();
       if (data.success) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+        setMessages((prev: { role: 'assistant' | 'user'; content: string }[]) => [...prev, { role: 'assistant', content: data.response }]);
       }
-    } catch (error) {
+    } catch {
       setIsConnected(false);
     } finally {
       setIsLoading(false);
@@ -109,7 +109,7 @@ export function Hero() {
             <div className="relative mx-auto w-full max-w-2xl">
               <div className="rounded-2xl border border-pink-100 bg-white/90 p-6 shadow-xl backdrop-blur-sm transition-shadow hover:shadow-2xl">
                 <div className="mb-4 space-y-4 max-h-[300px] overflow-y-auto">
-                  {messages.map((message, index) => (
+                  {messages.map((message: { role: 'assistant' | 'user'; content: string }, index: number) => (
                     <div key={index} className="flex items-start gap-3">
                       <div className={`rounded-full ${
                         message.role === 'assistant' 

@@ -35,7 +35,7 @@ export function SkinScan() {
         if (!data.upload_folder) {
           addToast('Storage system is initializing. Please wait...', 'info');
         }
-      } catch (err) {
+      } catch {
         setIsBackendConnected(false);
         addToast('Unable to connect to analysis service', 'error');
       }
