@@ -28,7 +28,7 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await fetch(${API_BASE_URL}/api/health);
+        const response = await fetch(`${API_BASE_URL}/api/health`);
         const data = await response.json();
         const newStatus = {
           modelLoaded: data.model_loaded || false,
@@ -38,11 +38,8 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
         };
         setStatus(newStatus);
         
-        // Auto-preload model after first successful health check
-        // This makes the first analysis faster
         if (!preloadTriggered && newStatus.databaseConnected && !newStatus.modelLoaded && !newStatus.modelLoading) {
           setPreloadTriggered(true);
-          // Trigger preload in background (don't await)
           preloadModel().catch(() => {});
         }
       } catch (error) {
@@ -61,19 +58,16 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [preloadTriggered]);
 
-  // Preload model by making a lightweight request that triggers lazy load
   const preloadModel = async () => {
     try {
       console.log('Preloading AI model in background...');
-      // This endpoint triggers the lazy loading of the model
-      await fetch(${API_BASE_URL}/api/model-status);
+      await fetch(`${API_BASE_URL}/api/model-status`);
       console.log('Model preload initiated');
     } catch (error) {
       console.error('Model preload failed:', error);
     }
   };
 
-  // isHealthy means the backend is reachable and ready to accept requests
   const isHealthy = status.databaseConnected && status.uploadFolderReady;
 
   return (
