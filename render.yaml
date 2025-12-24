@@ -1,0 +1,33 @@
+services:
+  # Backend Service
+  - type: web
+    name: derm-ai-backend
+    runtime: python
+    buildCommand: |
+      cd backend
+      pip install -r requirements.txt
+    startCommand: |
+      cd backend
+      gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: GROQ_API_KEY
+        sync: false
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false
+
+  # Frontend Service
+  - type: static
+    name: derm-ai-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://derm-ai-backend.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
