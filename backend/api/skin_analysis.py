@@ -120,19 +120,24 @@ class DermatologyAnalyzer:
             # Load checkpoint
             checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
             
-            # Extract class mappings
-            if 'class_to_idx' in checkpoint and 'idx_to_class' in checkpoint:
+            # Extract class mappings - handle different checkpoint formats
+            if 'classes' in checkpoint:
+                # New format: list of class names
+                self.class_names = tuple(checkpoint['classes'])
+                logger.info(f"Loaded class names from 'classes' key: {self.class_names}")
+                self.condition_codes = {name: name for name in self.class_names}
+            elif 'class_to_idx' in checkpoint and 'idx_to_class' in checkpoint:
+                # Old format: dictionaries
                 class_to_idx = checkpoint['class_to_idx']
                 idx_to_class = checkpoint['idx_to_class']
                 self.class_names = tuple(idx_to_class[i] for i in range(len(idx_to_class)))
-                logger.info(f"Loaded class names: {self.class_names}")
+                logger.info(f"Loaded class names from idx_to_class: {self.class_names}")
                 self.condition_codes = {name: name for name in self.class_names}
             else:
                 logger.warning("Class mappings not found in checkpoint, using default")
                 self.class_names = (
-                    'BA- cellulitis', 'BA-impetigo', 'FU-athlete-foot', 
-                    'FU-nail-fungus', 'FU-ringworm', 'PA-cutaneous-larva-migrans',
-                    'VI-chickenpox', 'VI-shingles'
+                    'Actinic keratoses', 'Basal cell carcinoma', 'Benign keratosis',
+                    'Dermatofibroma', 'Melanocytic nevi', 'Melanoma', 'Vascular lesions'
                 )
                 self.condition_codes = {name: name for name in self.class_names}
 
