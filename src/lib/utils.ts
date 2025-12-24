@@ -5,261 +5,231 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const DISEASE_INFO = {
-  'BA-cellulitis': {
-    description: 'Cellulitis is a common bacterial skin infection that affects the deeper layers of skin and the subcutaneous tissues. It most commonly occurs on the lower legs but can affect skin anywhere on the body.',
+export const DISEASE_INFO: Record<string, {
+  description: string;
+  symptoms: string[];
+  remedies: string[];
+  precautions?: string[];
+  emergency_signs?: string[];
+}> = {
+  // New HAM10000 Model Classes
+  'actinic-keratoses': {
+    description: 'Actinic keratoses are rough, scaly patches on the skin caused by years of sun exposure. They are considered precancerous and can develop into squamous cell carcinoma if left untreated.',
     symptoms: [
-      'Redness and swelling of the affected area',
-      'Skin that feels warm and tender to touch',
-      'Spreading redness over several days',
-      'Fever and chills in some cases',
-      'Swollen lymph nodes near the infection',
-      'Skin may appear stretched or glossy'
-    ],
-    precautions: [
-      'Keep the affected area clean and dry',
-      'Monitor the area for signs of spreading infection',
-      'Avoid scratching or injuring the affected skin',
-      'Elevate the affected area when possible',
-      'Clean any cuts or breaks in the skin promptly'
+      'Rough, dry or scaly patch of skin',
+      'Flat to slightly raised patch or bump',
+      'Color varying from pink to red to brown',
+      'Itching, burning or tender skin',
+      'Hard, wart-like surface'
     ],
     remedies: [
-      'Take prescribed antibiotics as directed',
-      'Apply warm compresses to the affected area',
-      'Rest and elevate the affected limb',
-      'Take over-the-counter pain relievers if needed',
-      'Keep the area clean with mild soap and water'
+      'Cryotherapy (freezing)',
+      'Topical medications (fluorouracil, imiquimod)',
+      'Photodynamic therapy',
+      'Chemical peels',
+      'Laser treatment'
+    ],
+    precautions: [
+      'Use broad-spectrum sunscreen daily',
+      'Wear protective clothing',
+      'Avoid peak sun hours',
+      'Regular skin examinations'
     ],
     emergency_signs: [
-      'Fever above 100.4°F (38°C)',
-      'Red streaks extending from the affected area',
-      'Severe pain or numbness',
-      'Rapid spreading of the affected area',
-      'Blistering or blackening of the affected skin'
+      'Rapid growth of lesion',
+      'Bleeding or ulceration',
+      'Significant pain or tenderness'
     ]
+  },
+  'basal-cell-carcinoma': {
+    description: 'Basal cell carcinoma is the most common type of skin cancer. It typically appears as a slightly transparent bump on sun-exposed skin but can take other forms.',
+    symptoms: [
+      'Pearly or waxy bump',
+      'Flat, flesh-colored or brown scar-like lesion',
+      'Bleeding or scabbing sore that heals and returns',
+      'Pink growth with elevated border',
+      'Open sore that does not heal'
+    ],
+    remedies: [
+      'Surgical excision',
+      'Mohs surgery',
+      'Curettage and electrodesiccation',
+      'Radiation therapy',
+      'Topical treatments for superficial cases'
+    ],
+    precautions: [
+      'Limit sun exposure',
+      'Use SPF 30+ sunscreen',
+      'Avoid tanning beds',
+      'Regular dermatologist check-ups'
+    ],
+    emergency_signs: [
+      'Rapid growth',
+      'Deep invasion into tissues',
+      'Spread to lymph nodes'
+    ]
+  },
+  'benign-keratosis': {
+    description: 'Benign keratosis includes seborrheic keratoses and solar lentigines. These are non-cancerous skin growths that commonly appear with age.',
+    symptoms: [
+      'Waxy, stuck-on appearance',
+      'Brown, black, or tan coloring',
+      'Slightly raised growths',
+      'Round or oval shape',
+      'May be itchy but usually painless'
+    ],
+    remedies: [
+      'Usually no treatment needed',
+      'Cryotherapy for removal',
+      'Curettage',
+      'Electrosurgery',
+      'Laser treatment'
+    ],
+    precautions: [
+      'Monitor for changes',
+      'Sun protection',
+      'Regular skin checks'
+    ]
+  },
+  'dermatofibroma': {
+    description: 'Dermatofibroma is a common benign skin growth that often appears on the lower legs. It feels like a hard lump under the skin.',
+    symptoms: [
+      'Small, firm bump',
+      'Brown to reddish-brown color',
+      'Dimples when pinched',
+      'Usually painless',
+      'May be itchy or tender'
+    ],
+    remedies: [
+      'Usually no treatment required',
+      'Surgical removal if bothersome',
+      'Cryotherapy',
+      'Laser treatment'
+    ],
+    precautions: [
+      'Avoid trauma to the area',
+      'Monitor for changes in size or color'
+    ]
+  },
+  'melanocytic-nevi': {
+    description: 'Melanocytic nevi, commonly known as moles, are benign growths composed of melanocytes. Most are harmless but should be monitored for changes.',
+    symptoms: [
+      'Brown, black, or skin-colored spots',
+      'Round or oval shape',
+      'Flat or raised',
+      'Usually smaller than 6mm',
+      'Even coloring and borders'
+    ],
+    remedies: [
+      'No treatment needed for normal moles',
+      'Surgical removal if suspicious',
+      'Regular monitoring using ABCDE rule'
+    ],
+    precautions: [
+      'Use sunscreen regularly',
+      'Perform monthly self-examinations',
+      'Annual dermatologist visits',
+      'Note any changes in moles'
+    ],
+    emergency_signs: [
+      'Asymmetry in shape',
+      'Border irregularity',
+      'Color variation',
+      'Diameter larger than 6mm',
+      'Evolution or changes over time'
+    ]
+  },
+  'melanoma': {
+    description: 'Melanoma is the most serious type of skin cancer. It develops in melanocytes and can spread to other organs if not caught early. Early detection is crucial.',
+    symptoms: [
+      'New or changing mole',
+      'Asymmetrical shape',
+      'Irregular, ragged borders',
+      'Multiple colors (brown, black, red, white, blue)',
+      'Diameter larger than 6mm',
+      'Evolving size, shape, or color'
+    ],
+    remedies: [
+      'Surgical excision',
+      'Immunotherapy',
+      'Targeted therapy',
+      'Radiation therapy',
+      'Chemotherapy for advanced cases'
+    ],
+    precautions: [
+      'Avoid excessive sun exposure',
+      'Use SPF 50+ sunscreen',
+      'Wear protective clothing',
+      'Never use tanning beds',
+      'Regular full-body skin exams'
+    ],
+    emergency_signs: [
+      'Rapid growth',
+      'Bleeding or ulceration',
+      'New symptoms like headache or vision changes',
+      'Lumps in lymph nodes'
+    ]
+  },
+  'vascular-lesions': {
+    description: 'Vascular lesions are abnormalities in blood vessels appearing on or under the skin. They include hemangiomas, port-wine stains, and cherry angiomas.',
+    symptoms: [
+      'Red, purple, or blue coloring',
+      'Flat or raised appearance',
+      'May blanch with pressure',
+      'Variable size',
+      'Usually painless'
+    ],
+    remedies: [
+      'Often no treatment needed',
+      'Laser therapy for cosmetic concerns',
+      'Surgery for large lesions',
+      'Beta-blockers for some hemangiomas'
+    ],
+    precautions: [
+      'Protect from trauma',
+      'Monitor for changes',
+      'Sunscreen to prevent darkening'
+    ]
+  },
+  // Legacy conditions for backwards compatibility
+  'BA-cellulitis': {
+    description: 'Cellulitis is a common bacterial skin infection causing redness, swelling, and warmth.',
+    symptoms: ['Red, swollen area', 'Pain and tenderness', 'Warmth', 'Fever'],
+    remedies: ['Antibiotics', 'Rest', 'Elevation', 'Pain relievers']
   },
   'BA-impetigo': {
-    description: 'Impetigo is a highly contagious bacterial skin infection that causes red sores that can break open, ooze fluid, and form a honey-colored crust. It commonly affects children and can spread through close contact.',
-    symptoms: [
-      'Red sores that quickly rupture and ooze',
-      'Honey-colored crust formation',
-      'Itching and soreness in affected areas',
-      'Small red blisters that may be itchy',
-      'Skin lesions primarily around nose and mouth',
-      'Sores that heal without leaving scars'
-    ],
-    precautions: [
-      'Wash hands frequently',
-      'Keep fingernails short and clean',
-      'Avoid touching or scratching the sores',
-      'Use separate towels and washcloths',
-      'Avoid close contact until healed'
-    ],
-    remedies: [
-      'Apply prescribed antibiotic ointment',
-      'Gently wash affected areas with mild soap',
-      'Keep sores covered with gauze',
-      'Take oral antibiotics if prescribed',
-      'Use antibiotic soap as recommended'
-    ],
-    emergency_signs: [
-      'Fever or swollen lymph nodes',
-      'Sores spreading rapidly',
-      'Deep tissue infection',
-      'Sores that will not heal after treatment',
-      'Signs of systemic infection'
-    ]
+    description: 'Impetigo is a highly contagious bacterial skin infection common in children.',
+    symptoms: ['Red sores', 'Honey-colored crust', 'Itching', 'Fluid-filled blisters'],
+    remedies: ['Topical antibiotics', 'Oral antibiotics', 'Keep area clean']
   },
   'FU-athlete-foot': {
-    description: 'Athletes foot (tinea pedis) is a common fungal infection that typically begins between the toes. It can cause a scaly rash that usually causes itching, stinging, and burning.',
-    symptoms: [
-      'Scaly, peeling, or cracking skin',
-      'Redness and blistering',
-      'Itching, stinging, or burning sensations',
-      'Softened, broken down skin',
-      'Dry, flaking skin on soles',
-      'Unpleasant foot odor'
-    ],
-    precautions: [
-      'Keep feet dry, especially between toes',
-      'Wear breathable shoes and socks',
-      'Change socks regularly',
-      'Never share shoes or socks',
-      'Use shower shoes in public areas'
-    ],
-    remedies: [
-      'Apply antifungal cream/powder',
-      'Keep feet clean and dry',
-      'Use medicated powders',
-      'Change socks frequently',
-      'Allow shoes to dry completely'
-    ],
-    emergency_signs: [
-      'Severe pain or swelling',
-      'Fever with infection',
-      'Cracks in skin that won\'t heal',
-      'Signs of bacterial infection',
-      'Spreading to other parts of body'
-    ]
+    description: 'Athlete\\'s foot is a fungal infection affecting the feet, especially between toes.',
+    symptoms: ['Itching', 'Scaling', 'Redness', 'Cracking skin'],
+    remedies: ['Antifungal cream', 'Keep feet dry', 'Wear breathable shoes']
   },
   'FU-nail-fungus': {
-    description: 'Nail fungus is a common condition that begins as a white or yellow spot under the tip of your fingernail or toenail. As it spreads deeper, it can cause nail discoloration, thickening, and crumbling at the edges.',
-    symptoms: [
-      'Thickened nails',
-      'Whitish to yellow-brown discoloration',
-      'Brittle, crumbly, or ragged nails',
-      'Distorted nail shape',
-      'Dark color from debris buildup',
-      'Slightly foul odor'
-    ],
-    precautions: [
-      'Keep nails trimmed and clean',
-      'Wear breathable footwear',
-      'Avoid sharing nail clippers',
-      'Protect feet in public areas',
-      'Keep feet dry and clean'
-    ],
-    remedies: [
-      'Apply prescribed antifungal medication',
-      'Keep nails short and dry',
-      'Use antifungal foot powder',
-      'Consider oral antifungal medications if prescribed',
-      'File down thick areas of nail'
-    ],
-    emergency_signs: [
-      'Severe pain or discomfort',
-      'Spreading beyond the nail',
-      'Signs of bacterial infection',
-      'Complete nail separation',
-      'Widespread infection'
-    ]
+    description: 'Nail fungus causes discoloration and thickening of nails.',
+    symptoms: ['Yellow nails', 'Thickened nails', 'Brittle nails', 'Distorted shape'],
+    remedies: ['Oral antifungals', 'Topical treatments', 'Nail removal in severe cases']
   },
   'FU-ringworm': {
-    description: 'Ringworm is a fungal infection that causes a red, circular rash with clearer skin in the middle. Despite its name, it\'s not caused by a worm but by fungi known as dermatophytes that live on the outer layer of skin.',
-    symptoms: [
-      'Circular, red, scaly patches',
-      'Raised borders with central clearing',
-      'Intense itching',
-      'Overlapping rings in severe cases',
-      'Hair loss if on scalp',
-      'Burning or stinging sensation'
-    ],
-    precautions: [
-      'Avoid sharing personal items',
-      'Keep skin clean and dry',
-      'Wash hands after touching affected areas',
-      'Avoid scratching the rash',
-      'Treat infected pets if present'
-    ],
-    remedies: [
-      'Apply antifungal cream as directed',
-      'Keep the affected area clean',
-      'Change clothes and bedding daily',
-      'Use medicated shampoo if on scalp',
-      'Continue treatment as prescribed'
-    ],
-    emergency_signs: [
-      'Rash spreading despite treatment',
-      'Signs of bacterial infection',
-      'Severe itching or burning',
-      'Fever or swollen lymph nodes',
-      'Deep skin cracks or bleeding'
-    ]
+    description: 'Ringworm is a fungal infection causing circular, scaly patches.',
+    symptoms: ['Ring-shaped rash', 'Itching', 'Red, scaly patches', 'Clear center'],
+    remedies: ['Antifungal cream', 'Keep area clean', 'Avoid sharing personal items']
   },
   'PA-cutaneous-larva-migrans': {
-    description: 'Cutaneous larva migrans is a skin condition caused by hookworm larvae that creates itchy, raised tracks in the skin. The larvae typically enter through bare skin that comes into contact with contaminated soil or sand.',
-    symptoms: [
-      'Intense itching along larval tracks',
-      'Raised, reddish snake-like lines',
-      'Progressive advancement of tracks',
-      'Blistering along the path',
-      'Visible movement under skin',
-      'Local swelling and tenderness'
-    ],
-    precautions: [
-      'Avoid walking barefoot on contaminated soil',
-      'Wear protective footwear on beaches',
-      'Use beach towels or chairs instead of lying directly on sand',
-      'Practice good hygiene',
-      'Avoid contact with stray animal feces'
-    ],
-    remedies: [
-      'Take prescribed anti-parasitic medication',
-      'Apply anti-itch cream if recommended',
-      'Keep the affected area clean',
-      'Follow medical advice carefully',
-      'Use oral antihistamines for itching'
-    ],
-    emergency_signs: [
-      'Severe allergic reaction',
-      'Signs of bacterial infection',
-      'Persistent symptoms after treatment',
-      'Spread to sensitive areas',
-      'Development of systemic symptoms'
-    ]
+    description: 'Creeping eruption is caused by hookworm larvae and creates winding tracks.',
+    symptoms: ['Itchy, winding rash', 'Red tracks', 'Blistering', 'Intense itching'],
+    remedies: ['Antiparasitic medication', 'Anti-itch creams', 'Keep area clean']
   },
   'VI-chickenpox': {
-    description: 'Chickenpox is a highly contagious viral infection causing an itchy, blister-like rash. It\'s caused by the varicella-zoster virus and is most common in children but can affect anyone who hasn\'t had it before.',
-    symptoms: [
-      'Itchy, fluid-filled blisters',
-      'Red spots and bumps',
-      'Fever and fatigue',
-      'Loss of appetite',
-      'Headache',
-      'Progressive rash that spreads'
-    ],
-    precautions: [
-      'Isolate until blisters crust over',
-      'Avoid scratching the blisters',
-      'Stay home from school/work',
-      'Practice good hygiene',
-      'Keep fingernails trimmed'
-    ],
-    remedies: [
-      'Apply calamine lotion',
-      'Take oatmeal baths',
-      'Use antihistamines for itching',
-      'Take antiviral medications if prescribed',
-      'Apply cool compresses'
-    ],
-    emergency_signs: [
-      'High fever lasting more than 4 days',
-      'Severe skin infections',
-      'Difficulty breathing',
-      'Dizziness or disorientation',
-      'Stiff neck or severe headache'
-    ]
+    description: 'Chickenpox is a highly contagious viral infection causing itchy blisters.',
+    symptoms: ['Itchy blisters', 'Fever', 'Fatigue', 'Rash spreading over body'],
+    remedies: ['Calamine lotion', 'Oatmeal baths', 'Antihistamines', 'Rest']
   },
   'VI-shingles': {
-    description: 'Shingles is a viral infection causing a painful rash that often appears as a stripe of blisters wrapping around either the left or right side of the torso. It\'s caused by reactivation of the chickenpox virus.',
-    symptoms: [
-      'Burning, tingling, or numbness',
-      'Sensitive, painful skin',
-      'Red rash following nerve paths',
-      'Fluid-filled blisters that break and crust',
-      'Itching and persistent pain',
-      'Symptoms usually affect one side'
-    ],
-    precautions: [
-      'Avoid touching or scratching the rash',
-      'Keep the rash covered',
-      'Avoid contact with high-risk individuals',
-      'Maintain good personal hygiene',
-      'Reduce stress levels'
-    ],
-    remedies: [
-      'Take prescribed antiviral medications',
-      'Apply cool compresses',
-      'Take pain relievers as recommended',
-      'Get plenty of rest',
-      'Keep affected area clean and dry'
-    ],
-    emergency_signs: [
-      'Rash near the eyes',
-      'Severe pain or widespread rash',
-      'Confusion or fever',
-      'Signs of bacterial infection',
-      'Persistent dizziness or weakness'
-    ]
+    description: 'Shingles is caused by reactivation of chickenpox virus, causing painful rash.',
+    symptoms: ['Painful rash', 'Blisters', 'Burning sensation', 'Fever'],
+    remedies: ['Antiviral medication', 'Pain relievers', 'Cool compresses']
   }
 };

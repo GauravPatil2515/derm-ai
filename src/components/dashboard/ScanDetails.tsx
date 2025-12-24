@@ -6,8 +6,17 @@ import { useToast } from '../../lib/ToastContext';
 import { DISEASE_INFO } from '../../lib/utils';
 import { GridBackground } from '../ui/GridBackground';
 
-// Add condition code mapping
-const conditionToCode = {
+// Add condition code mapping for both old and new model classes
+const conditionToCode: Record<string, string> = {
+  // New model classes (EfficientNet HAM10000)
+  'Actinic keratoses': 'actinic-keratoses',
+  'Basal cell carcinoma': 'basal-cell-carcinoma',
+  'Benign keratosis': 'benign-keratosis',
+  'Dermatofibroma': 'dermatofibroma',
+  'Melanocytic nevi': 'melanocytic-nevi',
+  'Melanoma': 'melanoma',
+  'Vascular lesions': 'vascular-lesions',
+  // Old model classes (for backwards compatibility)
   'Bacterial Cellulitis': 'BA-cellulitis',
   'Bacterial Impetigo': 'BA-impetigo',
   'Athletes Foot': 'FU-athlete-foot',
@@ -241,8 +250,8 @@ export function ScanDetails() {
                       <button
                         onClick={() => setShowGradCAM(false)}
                         className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${!showGradCAM
-                            ? 'bg-pink-600 text-white'
-                            : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+                          ? 'bg-pink-600 text-white'
+                          : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
                           }`}
                       >
                         <Eye className="h-4 w-4" />
@@ -251,8 +260,8 @@ export function ScanDetails() {
                       <button
                         onClick={() => setShowGradCAM(true)}
                         className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${showGradCAM
-                            ? 'bg-pink-600 text-white'
-                            : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+                          ? 'bg-pink-600 text-white'
+                          : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
                           }`}
                       >
                         <Brain className="h-4 w-4" />
