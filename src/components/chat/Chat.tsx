@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Trash2, Bot, User, Loader } from 'lucide-react';
+import { Send, Trash2, Bot, User, Loader, Mic, MicOff } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { API_BASE_URL } from '../../lib/config';
+
+// Add type definition for Web Speech API
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+    SpeechRecognition: any;
+  }
+}
 
 interface Message {
   id: string;
@@ -13,7 +21,7 @@ interface Message {
 const formatMessage = (content: string) => {
   // Split into sections based on **Title** pattern
   const sections = content.split(/\*\*(.*?)\*\*/).filter(Boolean);
-  
+
   return sections.map((section, index) => {
     if (index % 2 === 0) { // Content
       return (
@@ -51,9 +59,11 @@ export function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [userId] = useState(() => localStorage.getItem('chatUserId') || uuidv4());
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     localStorage.setItem('chatUserId', userId);
@@ -65,6 +75,52 @@ export function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event: any) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+        }
+        if (finalTranscript) {
+          setInput((prev) => prev + (prev ? ' ' : '') + finalTranscript);
+        }
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+        setIsListening(true);
+        setError(null);
+      } else {
+        setError('Speech recognition is not supported in this browser.');
+      }
+    }
+  };
 
   const checkConnection = async () => {
     try {
@@ -97,6 +153,11 @@ export function Chat() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    }
 
     const userMessage = input.trim();
     setInput('');
@@ -201,16 +262,14 @@ export function Chat() {
             {messages.map((message: Message) => (
               <div
                 key={message.id}
-                className={`flex items-start gap-3 ${
-                  message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'
-                }`}
+                className={`flex items-start gap-3 ${message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'
+                  }`}
               >
                 <div
-                  className={`rounded-full p-2 ${
-                    message.role === 'assistant' 
-                      ? 'bg-gradient-to-br from-pink-100 to-pink-200' 
-                      : 'bg-pink-500'
-                  }`}
+                  className={`rounded-full p-2 ${message.role === 'assistant'
+                    ? 'bg-gradient-to-br from-pink-100 to-pink-200'
+                    : 'bg-pink-500'
+                    }`}
                 >
                   {message.role === 'assistant' ? (
                     <Bot className="h-5 w-5 text-pink-600" />
@@ -219,13 +278,12 @@ export function Chat() {
                   )}
                 </div>
                 <div
-                  className={`flex-1 rounded-lg px-4 py-3 ${
-                    message.role === 'assistant'
-                      ? 'bg-pink-50/80 text-gray-800'
-                      : 'bg-pink-500 text-white'
-                  }`}
+                  className={`flex-1 rounded-lg px-4 py-3 ${message.role === 'assistant'
+                    ? 'bg-pink-50/80 text-gray-800'
+                    : 'bg-pink-500 text-white'
+                    }`}
                 >
-                  {message.role === 'assistant' 
+                  {message.role === 'assistant'
                     ? formatMessage(message.content)
                     : <p>{message.content}</p>
                   }
@@ -248,21 +306,36 @@ export function Chat() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="relative">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="w-full rounded-lg border border-pink-200 bg-white px-4 py-3 pr-12 text-gray-900 placeholder-pink-400 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20"
-          disabled={isLoading}
-        />
+      <form onSubmit={handleSubmit} className="relative flex gap-2">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={isListening ? "Listening..." : "Type your message..."}
+            className={`w-full rounded-lg border bg-white px-4 py-3 pr-12 text-gray-900 placeholder-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-500/20 ${isListening ? 'border-pink-500 ring-2 ring-pink-500/20' : 'border-pink-200 focus:border-pink-500'
+              }`}
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-pink-500 transition-colors hover:bg-pink-50 disabled:opacity-50"
+          >
+            <Send className="h-5 w-5" />
+          </button>
+        </div>
+
         <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-pink-500 transition-colors hover:bg-pink-50 disabled:opacity-50"
+          type="button"
+          onClick={toggleListening}
+          className={`rounded-lg p-3 transition-all duration-200 ${isListening
+            ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30'
+            : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
+            }`}
+          title={isListening ? "Stop listening" : "Start voice input"}
         >
-          <Send className="h-5 w-5" />
+          {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
         </button>
       </form>
 

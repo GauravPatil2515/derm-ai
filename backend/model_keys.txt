@@ -1,0 +1,13 @@
+Inspecting model at: C:\Users\GAURAV PATIL\Downloads\derm-ai-main\derm-ai-main\project\advanced_skin_disease_model.pth
+Total keys: 360
+First 10 keys:
+  conv_stem.weight
+  bn1.weight
+  bn1.bias
+  bn1.running_mean
+  bn1.running_var
+  bn1.num_batches_tracked
+  blocks.0.0.conv_dw.weight
+  blocks.0.0.bn1.weight
+  blocks.0.0.bn1.bias
+  blocks.0.0.bn1.running_mean

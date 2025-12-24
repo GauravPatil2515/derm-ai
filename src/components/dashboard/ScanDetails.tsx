@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { FileText, ThermometerSun, Pill, Shield, AlertTriangle, ExternalLink, Image as ImageIcon, Eye, Brain } from 'lucide-react';
+import { FileText, ThermometerSun, Pill, Shield, AlertTriangle, ExternalLink, Image as ImageIcon, Eye, Brain, Download } from 'lucide-react';
 import { API_BASE_URL } from '../../lib/config';
 import { useToast } from '../../lib/ToastContext';
 import { DISEASE_INFO } from '../../lib/utils';
@@ -68,15 +68,40 @@ export function ScanDetails() {
   const { addToast } = useToast();
   const userId = localStorage.getItem('chatUserId') || 'anonymous';
 
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/analysis/${id}/pdf`);
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DermAI_Report_${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      addToast('Report downloaded successfully', 'success');
+    } catch (err) {
+      addToast('Failed to download report', 'error');
+      console.error(err);
+    }
+  };
+
   React.useEffect(() => {
     const fetchAnalysis = async () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch(`${API_BASE_URL}/api/analysis/${id}?user_id=${userId}`);
         const data = await response.json();
-        
+
         if (!response.ok || !data.success) {
           throw new Error(data.error || 'Failed to fetch analysis details');
         }
@@ -122,13 +147,13 @@ export function ScanDetails() {
   const condition = analysis.primary_analysis?.condition || '';
   const conditionCode = conditionToCode[condition as keyof typeof conditionToCode] || condition;
   const diseaseInfo = DISEASE_INFO[conditionCode as keyof typeof DISEASE_INFO];
-  
+
   // Log condition info for debugging
   console.log(`Condition: ${condition}, Code: ${conditionCode}, Info Available: ${!!diseaseInfo}`);
 
   // Ensure detailed_analysis exists with fallback to empty object
   const detailedAnalysis = analysis.detailed_analysis || {};
-  
+
   const sections: AnalysisSection[] = [
     {
       title: 'Overview',
@@ -181,15 +206,25 @@ export function ScanDetails() {
                   Analysis Report #{id}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Generated on {analysis.report_metadata?.timestamp 
-                    ? new Date(analysis.report_metadata.timestamp).toLocaleString() 
+                  Generated on {analysis.report_metadata?.timestamp
+                    ? new Date(analysis.report_metadata.timestamp).toLocaleString()
                     : 'Unknown date'}
                 </p>
               </div>
-              <div className={`rounded-lg px-4 py-2 ${getConfidenceColor(analysis.primary_analysis?.confidence || 0)}`}>
-                <p className="text-sm font-medium">
-                  Confidence: {(analysis.primary_analysis?.confidence || 0).toFixed(1)}%
-                </p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleDownloadPDF}
+                  className="flex items-center gap-2 rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-700 shadow-sm"
+                  title="Download PDF Report"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">Download Report</span>
+                </button>
+                <div className={`rounded-lg px-4 py-2 ${getConfidenceColor(analysis.primary_analysis?.confidence || 0)}`}>
+                  <p className="text-sm font-medium">
+                    Confidence: {(analysis.primary_analysis?.confidence || 0).toFixed(1)}%
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -205,22 +240,20 @@ export function ScanDetails() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setShowGradCAM(false)}
-                        className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
-                          !showGradCAM
+                        className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${!showGradCAM
                             ? 'bg-pink-600 text-white'
                             : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
-                        }`}
+                          }`}
                       >
                         <Eye className="h-4 w-4" />
                         Original
                       </button>
                       <button
                         onClick={() => setShowGradCAM(true)}
-                        className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
-                          showGradCAM
+                        className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${showGradCAM
                             ? 'bg-pink-600 text-white'
                             : 'bg-pink-100 text-pink-600 hover:bg-pink-200'
-                        }`}
+                          }`}
                       >
                         <Brain className="h-4 w-4" />
                         AI Focus
@@ -228,7 +261,7 @@ export function ScanDetails() {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-pink-50">
                   {!showGradCAM ? (
                     <img
@@ -273,7 +306,7 @@ export function ScanDetails() {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Grad-CAM Explanation Text */}
                 {showGradCAM && analysis.visual_explanation?.explanation_text && (
                   <div className="mt-4 rounded-lg bg-blue-50 p-4">
@@ -289,7 +322,7 @@ export function ScanDetails() {
                         </p>
                       ))}
                     </div>
-                    
+
                     {/* Heatmap Statistics */}
                     {analysis.visual_explanation?.heatmap_stats && (
                       <div className="mt-3 grid grid-cols-3 gap-4 border-t border-blue-200 pt-3">

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Video, Calendar, Clock, MessageSquare, Search, Download, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Video, Calendar, MessageSquare, Search, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { DashboardCard } from './DashboardCard';
-import { Link } from 'react-router-dom';
 import { useService } from '../../lib/ServiceContext';
+import { useAuth } from '../../lib/AuthContext';
+import { DashboardSkeleton } from '../ui/Skeleton';
 import { API_BASE_URL } from '../../lib/config';
 
 interface SkinAnalysis {
@@ -34,26 +35,32 @@ export function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { status: serviceStatus, isHealthy } = useService();
-  const userId = localStorage.getItem('chatUserId') || 'anonymous';
+  const { user, loading: authLoading } = useAuth();
+
+  // Use user id if available, else anonymous (but dashboard usually implies personal history)
+  // If not logged in, we might show empty history or prompt.
+  const userId = user ? user.uid : 'anonymous';
 
   useEffect(() => {
-    fetchAnalysisHistory();
-  }, []);
+    if (!authLoading) {
+      fetchAnalysisHistory();
+    }
+  }, [authLoading, userId]); // Re-fetch when user changes
 
   const fetchAnalysisHistory = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const response = await fetch(`${API_BASE_URL}/api/analysis/history?user_id=${userId}`);
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || 'Failed to fetch analysis history');
       }
 
       setAnalyses(data.history);
-      
+
       // Calculate stats
       const stats = {
         total_scans: data.history.length,
@@ -61,7 +68,7 @@ export function Dashboard() {
         urgent_cases: data.history.filter((a: SkinAnalysis) => a.confidence < 0.5).length,
         reviewed: data.history.filter((a: SkinAnalysis) => a.confidence >= 0.7).length
       };
-      
+
       setStats(stats);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch analysis history');
@@ -78,13 +85,13 @@ export function Dashboard() {
   };
 
   const filteredAnalyses = analyses.filter(analysis => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       analysis.primary_condition.toLowerCase().includes(searchTerm.toLowerCase()) ||
       analysis.id.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const status = getStatusFromConfidence(analysis.confidence);
     const matchesFilter = selectedFilter === 'all' || status === selectedFilter;
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -158,7 +165,7 @@ export function Dashboard() {
         <div className="mb-8 rounded-lg bg-white p-6 shadow-sm border border-pink-100">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-pink-900">Recent Skin Analyses</h2>
-            
+
             <div className="flex flex-wrap items-center gap-4">
               {/* Search */}
               <div className="relative">
@@ -187,9 +194,7 @@ export function Dashboard() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-500 border-t-transparent"></div>
-            </div>
+            <DashboardSkeleton />
           ) : error ? (
             <div className="rounded-lg bg-red-50 p-4 text-red-800">{error}</div>
           ) : (
@@ -238,13 +243,13 @@ export function Dashboard() {
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(analysis.confidence)}`}>
-                          {getStatusFromConfidence(analysis.confidence).charAt(0).toUpperCase() + 
-                           getStatusFromConfidence(analysis.confidence).slice(1)}
+                          {getStatusFromConfidence(analysis.confidence).charAt(0).toUpperCase() +
+                            getStatusFromConfidence(analysis.confidence).slice(1)}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right">
                         <div className="flex justify-end space-x-3">
-                          <button 
+                          <button
                             onClick={() => window.location.href = `/scan/${analysis.id}`}
                             className="text-pink-400 hover:text-pink-500"
                           >

@@ -1,297 +1,219 @@
-# DermAI - AI-Po## 🚀 Features
-
-### Core AI Features
-- **Advanced Skin Analysis**: 8-class skin condition detection using Vision Transformer (ViT)
-- **Visual Explanations**: Grad-CAM heatmaps showing which areas influenced the diagnosis
-- **AI Chat Assistant**: Groq-powered dermatology consultations
-- **Real-time Processing**: Analysis results in under 2 seconds
-- **Confidence Scoring**: Detailed confidence metrics with uncertainty quantification
-
-### Visual Explanation Technology
-- **Grad-CAM Integration**: See exactly which skin features the AI focused on
-- **Interactive Visualizations**: Toggle between original image and attention heatmaps
-- **Detailed Analysis**: Statistics on focus areas and activation patterns
-- **Educational Value**: Learn about visual symptoms through AI explanationsis Platform
+# DermAI - AI-Powered Skin Analysis Platform
 
 <div align="center">
 
-![DermAI Logo](https://img.shields.io/badge/DermAI-Skin%20Analysis-pink?style=for-the-badge&logo=health&logoColor=white)
+![DermAI](https://img.shields.io/badge/DermAI-Skin%20Analysis-pink?style=for-the-badge&logo=health&logoColor=white)
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat&logo=python&logoColor=white)](https://python.org)
-[![React](https://img.shields.io/badge/React-18+-61DAFB?style=flat&logo=react&logoColor=white)](https://reactjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=flat&logo=typescript&logoColor=white)](https://typescriptlang.org)
-[![Flask](https://img.shields.io/badge/Flask-3+-000000?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
-[![License](https://img.shields.io/badge/License-Proprietary-red?style=flat)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat&logo=python)](https://python.org)
+[![React](https://img.shields.io/badge/React-18+-61DAFB?style=flat&logo=react)](https://reactjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=flat&logo=typescript)](https://typescriptlang.org)
+[![Flask](https://img.shields.io/badge/Flask-3+-000000?style=flat&logo=flask)](https://flask.palletsprojects.com)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=flat&logo=firebase)](https://firebase.google.com)
 
-*An advanced AI-powered skin analysis platform that combines machine learning with dermatological expertise to provide accurate skin condition assessments.*
+*Advanced AI-powered skin analysis platform combining machine learning with dermatological expertise*
+
+[Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation)
 
 </div>
 
+---
+
 ## 🌟 Features
 
-### Core Functionality
-- **🔬 AI-Powered Analysis**: Advanced deep learning models for skin condition identification
-- **💬 Intelligent Chat Assistant**: Real-time dermatology consultations with Groq AI
-- **📊 Detailed Reports**: Comprehensive analysis with confidence scores and recommendations
-- **🖼️ Secure Image Processing**: HIPAA-compliant image upload and processing
-- **📱 Responsive Design**: Optimized for desktop and mobile devices
-- **🔒 Privacy-First**: All data encrypted and securely stored
+### Core AI Capabilities
+- **🔬 8-Class Skin Condition Detection** - Vision Transformer (ViT) model with 95%+ accuracy
+- **🧠 Grad-CAM Visual Explanations** - See which areas influenced the AI's decision
+- **💬 AI Chat Assistant** - Real-time dermatology consultations powered by Groq AI
+- **📊 Comprehensive Reports** - Detailed analysis with symptoms, treatments, and prevention
+- **⚡ Real-time Processing** - Analysis results in under 2 seconds
 
-### Technical Features
-- **⚡ Real-time Processing**: Sub-second analysis response times
-- **🎯 High Accuracy**: 8-class skin condition detection with 95%+ accuracy
-- **🔄 Continuous Learning**: Model improvements through federated learning
-- **📈 Analytics Dashboard**: Usage statistics and performance metrics
-- **🌐 Multi-language Support**: Available in multiple languages
-- **♿ Accessibility**: WCAG 2.1 AA compliant
+### User Features
+- **🔐 Firebase Authentication** - Secure login with Email/Password and Google Sign-In
+- **👤 User Profiles** - Manage account settings and change password
+- **📈 Analytics Dashboard** - Track analysis history and trends
+- **📱 Mobile Responsive** - Works seamlessly on all devices
+- **📥 Export Data** - Download analysis history as CSV or JSON
+- **📄 PDF Reports** - Branded, detailed analysis reports
+
+### Detected Conditions
+| Category | Conditions |
+|----------|------------|
+| Bacterial | Cellulitis, Impetigo |
+| Fungal | Athlete's Foot, Nail Fungus, Ringworm |
+| Parasitic | Creeping Eruption |
+| Viral | Chickenpox, Shingles |
+
+---
 
 ## 🚀 Quick Start
 
-### Using the Startup Script (Recommended)
-```powershell
-# Clone the repository
-git clone https://github.com/yourusername/derm-ai.git
-cd derm-ai
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- GROQ API Key (for AI chat)
 
-# Run the startup script
-.\start-derm-ai.ps1
-```
+### Installation
 
-### Manual Setup
-
-#### Prerequisites
-- **Node.js** >= 18.0.0
-- **Python** >= 3.10.0
-- **Git** (for version control)
-
-#### 1. Frontend Setup
+1. **Clone the repository**
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+git clone https://github.com/GauravPatil2515/derm-ai.git
+cd derm-ai/project
 ```
-Frontend will be available at: `http://localhost:5176/derm-ai/`
 
-#### 2. Backend Setup
+2. **Setup Backend**
 ```bash
 cd backend
-
-# Create and activate virtual environment
 python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # macOS/Linux
-
-# Install dependencies
+.\venv\Scripts\activate  # Windows
+source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
-
-# Initialize database
-python init_db.py
-
-# Start the Flask server
-python app.py
 ```
-Backend API will be available at: `http://localhost:5002`
 
-## 🔧 Configuration
-
-### Environment Variables
-Create a `.env` file in the `backend/` directory:
-
-```env
-# Flask Configuration
-FLASK_ENV=development
-FLASK_APP=app.py
-FLASK_DEBUG=1
-
-# AI Configuration
+3. **Configure Environment**
+```bash
+# Create backend/.env
 GROQ_API_KEY=your_groq_api_key_here
-
-# Security (Optional)
-SECRET_KEY=your_secret_key_here
 ```
 
-### API Configuration
-The application uses the following default ports:
-- **Frontend**: 5176
-- **Backend**: 5002
+4. **Setup Frontend**
+```bash
+cd ..  # Back to project root
+npm install
+```
 
-These can be modified in `vite.config.ts` and `app.py` respectively.
+5. **Download AI Model**
+- Place `advanced_skin_disease_model.pth` in the `project/` directory
+- *Model file not included due to size (~300MB)*
+
+6. **Run the Application**
+```bash
+# Terminal 1 - Backend
+cd backend
+python app.py
+
+# Terminal 2 - Frontend
+npm run dev
+```
+
+7. **Access the App**
+- Frontend: http://localhost:5176/derm-ai/
+- Backend API: http://localhost:5002
+
+---
 
 ## 📁 Project Structure
 
 ```
-derm-ai/
-├── 📂 src/                    # Frontend source code
-│   ├── 📂 components/         # React components
-│   │   ├── 📂 chat/          # Chat interface components
-│   │   ├── 📂 dashboard/     # Dashboard components
-│   │   ├── 📂 landing/       # Landing page components
-│   │   └── 📂 ui/            # Reusable UI components
-│   ├── 📂 lib/               # Utility libraries
-│   └── 📂 types/             # TypeScript type definitions
-├── 📂 backend/               # Backend source code
-│   ├── 📂 api/               # API endpoints
-│   │   ├── 📄 derm_ai_chat.py    # Chat functionality
-│   │   └── 📄 skin_analysis.py   # Analysis engine
-│   ├── 📂 models/            # Database models
-│   ├── 📂 static/            # Static files and uploads
-│   └── 📄 app.py             # Main Flask application
-├── 📂 public/                # Public assets
-├── 📄 package.json           # Frontend dependencies
-├── 📄 vite.config.ts         # Vite configuration
-├── 📄 tailwind.config.js     # Tailwind CSS configuration
-├── 📄 start-derm-ai.ps1      # Startup script
-└── 📄 README.md              # This file
+project/
+├── backend/
+│   ├── api/                 # API endpoints
+│   │   ├── derm_ai_chat.py  # Groq AI chat
+│   │   └── skin_analysis.py # ViT model analysis
+│   ├── utils/
+│   │   ├── gradcam.py       # Grad-CAM visualization
+│   │   └── pdf_generator.py # PDF report generation
+│   ├── models/              # Database models
+│   ├── app.py               # Flask application
+│   └── config.py            # Configuration
+│
+├── src/
+│   ├── components/
+│   │   ├── auth/            # Login, Signup, ForgotPassword
+│   │   ├── dashboard/       # Dashboard, SkinScan, Analytics
+│   │   ├── profile/         # User profile page
+│   │   ├── chat/            # AI chat interface
+│   │   ├── common/          # Navbar, shared components
+│   │   └── ui/              # Reusable UI components
+│   ├── lib/
+│   │   ├── AuthContext.tsx  # Firebase authentication
+│   │   ├── firebase.ts      # Firebase configuration
+│   │   └── ServiceContext.tsx # API health monitoring
+│   └── App.tsx              # Main application
+│
+└── public/                  # Static assets
 ```
 
-## 🧪 Testing
+---
 
-### Run Integration Tests
-```bash
-# Backend API tests
-node test_integration.js
+## 🔧 API Endpoints
 
-# Frontend connectivity test
-# Open: connectivity-test.html in your browser
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+| GET | `/api/model-status` | AI model status |
+| POST | `/api/analyze` | Analyze skin image |
+| GET | `/api/analysis/history` | Get analysis history |
+| GET | `/api/analysis/:id` | Get specific analysis |
+| GET | `/api/analysis/:id/pdf` | Download PDF report |
+| POST | `/api/chat/` | Chat with AI assistant |
 
-### Health Check Endpoints
-- **Backend Health**: `GET http://localhost:5002/api/health`
-- **Model Status**: `GET http://localhost:5002/api/model-status`
-- **Chat Health**: `GET http://localhost:5002/api/chat/health`
+---
 
-## 🔍 Supported Skin Conditions
+## 🔐 Authentication
 
-The AI model can identify the following skin conditions:
+DermAI uses **Firebase Authentication** with support for:
+- Email/Password authentication
+- Google Sign-In
+- Password reset via email
 
-1. **🦠 Bacterial Cellulitis** - Bacterial skin and soft tissue infection
-2. **🦠 Bacterial Impetigo** - Superficial bacterial skin infection
-3. **🍄 Athlete's Foot** - Fungal infection of the feet
-4. **🍄 Nail Fungus** - Fungal infection of the nails
-5. **🍄 Ringworm** - Fungal infection causing ring-shaped rashes
-6. **🪱 Creeping Eruption** - Parasitic skin infection
-7. **🦠 Chickenpox** - Viral infection causing itchy blisters
-8. **🦠 Shingles** - Viral infection causing painful rashes
+Protected routes require authentication:
+- `/dashboard` - Analysis history
+- `/scan/:id` - Analysis details
+- `/analytics` - Analytics dashboard
+- `/profile` - User profile
 
-## 🛠️ Development
+---
 
-### Code Style
-- **Frontend**: ESLint + Prettier
-- **Backend**: Black + Flake8
-- **TypeScript**: Strict mode enabled
+## 🛡️ Security Features
 
-### Contributing Guidelines
+- **Rate Limiting** - Per-user API rate limits using Firebase UID
+- **Protected Routes** - Authentication required for sensitive features
+- **CORS Protection** - Configured allowed origins
+- **File Validation** - Image type and size validation
+- **Automatic Cleanup** - Uploaded files deleted after analysis
+
+---
+
+## 📱 Screenshots
+
+### Landing Page
+Modern, responsive landing page with live AI chat demo
+
+### Dashboard
+View all your skin analyses with filtering and search
+
+### Skin Analysis
+Upload images and get instant AI-powered analysis with Grad-CAM explanations
+
+### Analytics
+Track your analysis history with charts and export functionality
+
+---
+
+## 🤝 Contributing
+
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### Development Tools
-```bash
-# Code formatting
-npm run format        # Frontend
-black backend/        # Backend
-
-# Linting
-npm run lint          # Frontend
-flake8 backend/       # Backend
-
-# Type checking
-npm run type-check    # Frontend
-mypy backend/         # Backend
-```
-
-## 📊 Performance Metrics
-
-- **Analysis Speed**: < 2 seconds per image
-- **Model Accuracy**: 95.3% on validation set
-- **Uptime**: 99.9% availability
-- **Response Time**: < 100ms API response time
-
-## 🔐 Security Features
-
-- **🔒 Encryption**: All data encrypted in transit and at rest
-- **🛡️ Input Validation**: Comprehensive input sanitization
-- **🚫 Rate Limiting**: API rate limiting to prevent abuse
-- **👤 Privacy**: No personal data stored without consent
-- **🔑 Secure Headers**: CSRF and XSS protection
-
-## 🚀 Deployment
-
-### Production Deployment
-```bash
-# Build frontend
-npm run build
-
-# Set environment to production
-export FLASK_ENV=production
-
-# Use production WSGI server
-gunicorn app:app
-```
-
-### Docker Deployment (Optional)
-```dockerfile
-# Dockerfile example available upon request
-```
-
-## 📝 API Documentation
-
-### Endpoints
-
-#### Analysis
-- `POST /api/analyze` - Analyze uploaded image
-- `GET /api/analysis/history` - Get user's analysis history
-- `GET /api/analysis/{id}` - Get specific analysis details
-
-#### Chat
-- `POST /api/chat/` - Send message to AI assistant
-- `GET /api/chat/history` - Get chat history
-- `POST /api/chat/clear` - Clear chat history
-
-#### Health
-- `GET /api/health` - Application health status
-- `GET /api/model-status` - AI model status
-
-## 🤝 Support
-
-### Getting Help
-- **📧 Email**: gauravpatil2516@gmail.com
-- **📖 Documentation**: See `/docs` directory
-- **🐛 Issues**: GitHub Issues (for authorized users)
-
-### FAQ
-**Q: What image formats are supported?**
-A: JPEG, PNG, and WebP formats up to 16MB
-
-**Q: How accurate is the AI analysis?**
-A: Our model achieves 95.3% accuracy on validation data
-
-**Q: Is my data secure?**
-A: Yes, all data is encrypted and we follow HIPAA guidelines
+---
 
 ## 📄 License
 
-This project is proprietary software. Unauthorized copying, modification, or distribution is strictly prohibited. 
+This project is for educational purposes. Please consult healthcare professionals for medical advice.
 
-© 2025 Gaurav Patil. All rights reserved.
+---
 
-## 🙏 Acknowledgments
+## ⚠️ Disclaimer
 
-- **Groq AI** for providing the conversational AI infrastructure
-- **PyTorch** team for the deep learning framework
-- **React** and **Vite** teams for the frontend tools
-- **Flask** team for the backend framework
+**DermAI is NOT a substitute for professional medical diagnosis.** The AI predictions are for informational purposes only. Always consult a certified dermatologist for proper diagnosis and treatment.
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by [Gaurav Patil](https://github.com/yourusername)**
-
-*Making dermatological care accessible through AI*
+Made with ❤️ by [Gaurav Patil](https://github.com/GauravPatil2515)
 
 </div>

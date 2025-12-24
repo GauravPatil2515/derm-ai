@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, WifiOff } from 'lucide-react';
+import { AlertCircle, WifiOff, Lock } from 'lucide-react';
 import { SkinScanUpload } from './SkinScanUpload';
 import { useService } from '../../lib/ServiceContext';
 import { useToast } from '../../lib/ToastContext';
+import { useAuth } from '../../lib/AuthContext';
 import { API_BASE_URL } from '../../lib/config';
 
 const UPLOAD_TIMEOUT = 30000; // 30 seconds
@@ -16,7 +17,11 @@ export function SkinScan() {
   const navigate = useNavigate();
   const { isHealthy } = useService();
   const { addToast } = useToast();
-  const userId = localStorage.getItem('chatUserId') || 'anonymous';
+  const { user } = useAuth();
+
+  // Use authenticated user ID or 'anonymous' (backend handles anonymous)
+  // BUT: We want to encourage login for history.
+  const userId = user ? user.uid : 'anonymous';
 
   useEffect(() => {
     const checkBackendHealth = async () => {
@@ -24,11 +29,17 @@ export function SkinScan() {
         const response = await fetch(`${API_BASE_URL}/api/health`);
         const data = await response.json();
         setIsBackendConnected(data.status === 'healthy');
-        
+
         // Additional health check feedback
-        if (!data.model_loaded) {
-          addToast('Analysis model is initializing. Please wait...', 'info');
+        if (!data.model_loaded && !data.model_loading) {
+          // It's not loaded AND not loading -> Cold state (lazy load pending)
+          // We don't need to spam the user, just maybe a subtle hint or nothing.
+          // If they click analyze, it will trigger load.
+          console.log("Model not loaded yet. Will lazy-load on first request.");
+        } else if (data.model_loading) {
+          addToast('AI Model is currently loading...', 'info');
         }
+
         if (!data.database_connected) {
           addToast('Database connection issues. Some features may be limited.', 'error');
         }
@@ -37,7 +48,10 @@ export function SkinScan() {
         }
       } catch {
         setIsBackendConnected(false);
-        addToast('Unable to connect to analysis service', 'error');
+        // Only show error if we were previously connected to avoid spam on startup
+        if (isBackendConnected) {
+          addToast('Unable to connect to analysis service', 'error');
+        }
       }
     };
 
@@ -55,7 +69,7 @@ export function SkinScan() {
     try {
       setIsAnalyzing(true);
       setError(null);
-      
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('user_id', userId);
@@ -82,13 +96,13 @@ export function SkinScan() {
           }
 
           const data = await response.json();
-          
+
           if (!data.success || !data.result) {
             throw new Error(data.error || 'Failed to analyze image');
           }
 
           addToast('Analysis completed successfully', 'success');
-          
+
           // Navigate to the details page if we have an analysis ID
           if (data.result.id) {
             navigate(`/scan/${data.result.id}`);
@@ -107,7 +121,7 @@ export function SkinScan() {
           }
         }
       }
-      
+
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to analyze image';
       setError(message);
@@ -123,6 +137,21 @@ export function SkinScan() {
         <h1 className="text-2xl font-bold text-pink-800">Skin Analysis</h1>
         <p className="mt-2 text-pink-600">Upload an image for AI-powered skin condition analysis</p>
       </div>
+
+      {!user && (
+        <div className="mb-6 flex items-center justify-between rounded-lg bg-blue-50 p-4 text-blue-800">
+          <div className="flex items-center">
+            <Lock className="mr-2 h-4 w-4" />
+            <span className="text-sm">Log in to save your detailed analysis history securely.</span>
+          </div>
+          <button
+            onClick={() => navigate('/login')}
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+          >
+            Log In
+          </button>
+        </div>
+      )}
 
       {!isBackendConnected && (
         <div className="mb-6 rounded-lg bg-yellow-50 p-4">
@@ -149,11 +178,23 @@ export function SkinScan() {
         )}
       </div>
 
+
       {error && (
         <div className="mb-6 rounded-lg bg-red-50 p-4">
-          <div className="flex items-center">
-            <AlertCircle className="mr-3 h-5 w-5 text-red-600" />
-            <p className="text-red-800">{error}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <AlertCircle className="mr-3 h-5 w-5 text-red-600" />
+              <div>
+                <p className="font-medium text-red-800">Analysis Failed</p>
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       )}

@@ -1,0 +1,20 @@
+INFO:api.skin_analysis:Using device: cuda
+INFO:api.skin_analysis:Attempting to load model from: C:\Users\GAURAV PATIL\Downloads\derm-ai-main\derm-ai-main\project\advanced_skin_disease_model.pth
+WARNING:api.skin_analysis:Class mappings not found in checkpoint, using default
+INFO:api.skin_analysis:EfficientNet model loaded successfully with 8 classes
+INFO:api.skin_analysis:Model verification successful
+INFO:api.skin_analysis:Grad-CAM processor initialized successfully
+==================================================
+Starting DermAI Backend Server
+==================================================
+Initializing DermatologyAnalyzer...
+Analyzer initialized. Model loaded: True
+Starting Flask app on port 5002
+Server will be available at: http://localhost:5002
+ * Serving Flask app 'app'
+ * Debug mode: off
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.31.249:5002
+INFO:werkzeug:Press CTRL+C to quit

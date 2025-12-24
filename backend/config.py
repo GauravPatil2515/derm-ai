@@ -27,7 +27,10 @@ class Config:
     RATELIMIT_STORAGE_URL = "memory://"
     
     # CORS configuration
-    CORS_ORIGINS = ["http://localhost:5176", "http://localhost:5177", "http://localhost:5178"]
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:5176').split(',')
+    
+    # Model configuration
+    MODEL_PATH = os.path.join(BASE_DIR, '..', 'advanced_skin_disease_model.pth')
     
     # Logging configuration
     LOG_LEVEL = 'INFO' if FLASK_ENV == 'production' else 'DEBUG'

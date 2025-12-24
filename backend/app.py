@@ -59,6 +59,7 @@ def create_app(config_class=Config):
 app = create_app()
 
 @app.route('/api/model-status')
+@limiter.exempt
 def model_status():
     """Check model status without importing heavy dependencies"""
     try:
@@ -124,12 +125,16 @@ def model_status():
         }), 500
 
 @app.route('/api/health')
+@limiter.exempt
 def health_check():
     """Enhanced health check endpoint with service status"""
     try:
-        # Check model status using global analyzer
-        global analyzer
+        # Check model status using global variables
+        global analyzer, analyzer_loading
+        
         model_loaded = False
+        is_loading = analyzer_loading
+        
         if analyzer is not None:
             model_loaded = analyzer.is_model_loaded()
         
@@ -150,6 +155,7 @@ def health_check():
             'message': 'Server is running',
             'timestamp': datetime.now().isoformat(),
             'model_loaded': model_loaded,
+            'model_loading': is_loading, # New field for frontend
             'database_connected': database_connected,
             'upload_folder': upload_folder_ready
         })
@@ -159,6 +165,7 @@ def health_check():
             'message': f'Health check failed: {str(e)}',
             'timestamp': datetime.now().isoformat(),
             'model_loaded': False,
+            'model_loading': False,
             'database_connected': False,
             'upload_folder': False
         }), 500
@@ -174,14 +181,15 @@ def test_route():
 @app.route('/api/analyze', methods=['POST'])
 def analyze_image():
     """Analyze uploaded image using the global analyzer"""
+    filepath = None
     try:
-        global analyzer
+        analyzer_instance = get_analyzer()
         
         # Check if analyzer is available
-        if analyzer is None:
+        if analyzer_instance is None:
             return jsonify({
                 'success': False,
-                'error': 'Analysis service unavailable - model not loaded'
+                'error': 'Analysis service unavailable - Model is loading or failed to load. Please try again in a moment.'
             }), 503
         
         # Check if file is provided
@@ -211,8 +219,15 @@ def analyze_image():
         file.save(filepath)
         
         try:
+            # Check model loaded state specifically
+            if not analyzer_instance.is_model_loaded():
+                 return jsonify({
+                    'success': False,
+                    'error': 'Model not loaded correctly on server.'
+                }), 500
+
             # Process the analysis with the file path
-            result = analyzer.analyze_image(filepath)
+            result = analyzer_instance.analyze_image(filepath)
             
             # Generate analysis ID
             analysis_id = f"analysis_{timestamp}_{os.urandom(4).hex()}"
@@ -229,7 +244,7 @@ def analyze_image():
             analysis_record = SkinAnalysisResult(
                 analysis_id=analysis_id,
                 user_id=user_id,
-                image_path=filepath,
+                image_path=filepath, # Note: We keep the path in DB but might delete file. Consider persisting if needed.
                 image_filename=unique_filename,
                 analysis_data=json.dumps(result),
                 predicted_condition=predicted_condition,
@@ -248,20 +263,24 @@ def analyze_image():
             })
         
         except Exception as analysis_error:
-            # Clean up file on analysis error
-            try:
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-            except:
-                pass
+            logger.error(f"Analysis specific error: {str(analysis_error)}")
             raise analysis_error
-    
+            
     except Exception as e:
         logger.error(f"Error in analyze_image: {str(e)}")
         return jsonify({
             'success': False,
             'error': f'Analysis failed: {str(e)}'
         }), 500
+    finally:
+        # CLEANUP: Delete the uploaded file to save space
+        # NOTE: If you decide to keep files for history, remove this block or move after success logic
+        try:
+            if filepath and os.path.exists(filepath):
+                os.remove(filepath)
+                logger.info(f"Cleaned up uploaded file: {filepath}")
+        except Exception as cleanup_error:
+            logger.error(f"Failed to cleanup file {filepath}: {str(cleanup_error)}")
 
 @app.route('/api/analysis/history', methods=['GET'])
 def get_analysis_history():
@@ -297,21 +316,19 @@ def get_analysis_history():
         
         return jsonify({
             'success': True,
-            'history': history,
-            'total_count': len(history)
+            'history': history
         })
         
     except Exception as e:
-        logger.error(f"Error fetching analysis history: {str(e)}")
+        logger.error(f"Error getting analysis history: {str(e)}")
         return jsonify({
-            'success': False,
-            'error': f'Failed to fetch analysis history: {str(e)}',
-            'history': []
+            'success': False, 
+            'error': str(e)
         }), 500
 
 @app.route('/api/analysis/<analysis_id>', methods=['GET'])
 def get_analysis_details(analysis_id):
-    """Get detailed analysis results for a specific analysis"""
+    """Get detailed analysis result by ID"""
     try:
         from models.skin_analysis import SkinAnalysisResult
         
@@ -322,51 +339,92 @@ def get_analysis_details(analysis_id):
                 'success': False,
                 'error': 'Analysis not found'
             }), 404
-        
-        # Parse the analysis data
-        try:
-            analysis_data = json.loads(analysis.analysis_data) if analysis.analysis_data else {}
-        except json.JSONDecodeError:
-            analysis_data = {}
-        
+            
         return jsonify({
             'success': True,
-            'result': analysis_data  # Return the analysis data directly as 'result'
+            'result': {
+                'id': analysis.analysis_id,
+                'timestamp': analysis.timestamp.isoformat(),
+                'analysis': json.loads(analysis.analysis_data) if analysis.analysis_data else {},
+                'image_url': f"/static/uploads/{analysis.image_filename}" if analysis.image_filename else None
+            }
         })
         
     except Exception as e:
-        logger.error(f"Error fetching analysis details: {str(e)}")
+        logger.error(f"Error getting analysis details: {str(e)}")
         return jsonify({
             'success': False,
-            'error': f'Failed to fetch analysis details: {str(e)}'
+            'error': str(e)
         }), 500
+
+@app.route('/api/analysis/<analysis_id>/pdf', methods=['GET'])
+def download_analysis_pdf(analysis_id):
+    """Generate and download PDF report for an analysis"""
+    try:
+        from models.skin_analysis import SkinAnalysisResult
+        from utils.pdf_generator import PDFReportGenerator
+        from flask import send_file
+        
+        analysis = SkinAnalysisResult.query.filter_by(analysis_id=analysis_id).first()
+        
+        if not analysis:
+            return jsonify({'error': 'Analysis not found'}), 404
+            
+        # Parse analysis data
+        analysis_data = json.loads(analysis.analysis_data) if analysis.analysis_data else {}
+        
+        # Generate PDF
+        pdf_gen = PDFReportGenerator()
+        pdf_buffer = pdf_gen.generate_report(analysis_data, analysis.image_path)
+        
+        return send_file(
+            pdf_buffer,
+            as_attachment=True,
+            download_name=f"DermAI_Report_{analysis_id}.pdf",
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating PDF: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
 
 # Global variables for services
 analyzer = None
-analyzer_error = None
+analyzer_loading = False
 
-def initialize_analyzer():
-    """Initialize the analyzer at startup"""
-    global analyzer, analyzer_error
+def get_analyzer():
+    """Lazy load the analyzer"""
+    global analyzer, analyzer_loading
+    
+    if analyzer is not None:
+        return analyzer
+        
+    if analyzer_loading:
+        return None  # Or raise an error saying it's loading
+        
     try:
+        analyzer_loading = True
+        print("Lazy loading DermatologyAnalyzer...")
         from api.skin_analysis import DermatologyAnalyzer
-        print("Initializing DermatologyAnalyzer...")
         analyzer = DermatologyAnalyzer()
         print(f"Analyzer initialized. Model loaded: {analyzer.is_model_loaded()}")
-        analyzer_error = None
-        return True
+        return analyzer
     except Exception as e:
         print(f"Failed to initialize analyzer: {str(e)}")
-        analyzer = None
-        analyzer_error = str(e)
-        return False
+        import traceback
+        traceback.print_exc()
+        return None
+    finally:
+        analyzer_loading = False
 
 if __name__ == '__main__':
     # Initialize analyzer before starting server
     print("=" * 50)
     print("Starting DermAI Backend Server")
     print("=" * 50)
-    initialize_analyzer()
+    # Note: Analyzer is now lazy-loaded on first request to speed up startup
     
     port = int(os.environ.get('PORT', 5002))  # Use port 5002 as expected by frontend
     print(f"Starting Flask app on port {port}")
