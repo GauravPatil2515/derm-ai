@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
 import { useToast } from '../../lib/ToastContext';
-import { Activity, Mail, Lock } from 'lucide-react';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -41,32 +40,32 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-mesh p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] p-4">
+      <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-teal-600 flex items-center justify-center">
+              <span className="text-white font-bold">D</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">DermAI</span>
+            <span className="text-xl font-bold text-gray-900">DermAI</span>
           </Link>
         </div>
 
         {/* Card */}
-        <div className="card-glass p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
-            <p className="text-gray-600 mt-2">Sign in to your account</p>
+        <div className="card p-6">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Welcome back</h2>
+            <p className="text-gray-600 text-sm mt-1">Sign in to your account</p>
           </div>
 
           {/* Google Sign-In */}
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 mb-6 font-medium shadow-sm"
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 mb-4 text-sm font-medium"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -76,64 +75,54 @@ export function Login() {
           </button>
 
           {/* Divider */}
-          <div className="relative mb-6">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white/70 text-gray-500">or</span>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-2 bg-white text-gray-500">or</span>
             </div>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="input-premium pl-11"
-                  placeholder="you@example.com"
-                />
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="input"
+                placeholder="you@example.com"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="input-premium pl-11"
-                  placeholder="••••••••"
-                />
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="input"
+                placeholder="••••••••"
+              />
             </div>
 
-            <div className="flex items-center justify-end">
-              <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm text-teal-600 hover:text-teal-700">
                 Forgot password?
               </Link>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-premium w-full"
-            >
+            <button type="submit" disabled={loading} className="btn-primary w-full">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className="mt-4 text-center text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
+            <Link to="/signup" className="text-teal-600 hover:text-teal-700 font-medium">
               Sign up
             </Link>
           </p>

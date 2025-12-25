@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MessageSquare, Camera, LayoutDashboard, LogOut, LogIn, Menu, X, User, BarChart3, Activity } from 'lucide-react';
+import { MessageSquare, Camera, LayoutDashboard, LogOut, LogIn, Menu, X, User, BarChart3 } from 'lucide-react';
 import { useService } from '../../lib/ServiceContext';
 import { useAuth } from '../../lib/AuthContext';
 import { useToast } from '../../lib/ToastContext';
@@ -36,15 +36,15 @@ export function Navbar() {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex h-14 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-              <Activity className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">D</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">DermAI</span>
+            <span className="font-semibold text-gray-900">DermAI</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -53,8 +53,8 @@ export function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.path)
-                    ? 'bg-primary-50 text-primary-700'
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive(link.path)
+                    ? 'bg-teal-50 text-teal-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
               >
@@ -67,8 +67,8 @@ export function Navbar() {
           {/* User Section */}
           <div className="hidden md:flex items-center gap-3">
             {!isHealthy && (
-              <span className="text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-600">
-                Limited
+              <span className="text-xs px-2 py-1 rounded bg-amber-50 text-amber-600">
+                Initializing
               </span>
             )}
 
@@ -76,16 +76,16 @@ export function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   to="/profile"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full ring-2 ring-white shadow-sm" />
+                    <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
+                    <div className="w-7 h-7 rounded-full bg-teal-100 flex items-center justify-center">
+                      <User className="w-3.5 h-3.5 text-teal-600" />
                     </div>
                   )}
-                  <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                  <span className="text-sm text-gray-700 max-w-[100px] truncate">
                     {user.displayName || user.email?.split('@')[0]}
                   </span>
                 </Link>
@@ -98,11 +98,8 @@ export function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link
-                to="/login"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                <LogIn className="w-4 h-4" />
+              <Link to="/login" className="btn-primary text-sm py-2">
+                <LogIn className="w-4 h-4 mr-1.5 inline" />
                 Sign In
               </Link>
             )}
@@ -126,8 +123,8 @@ export function Navbar() {
                   key={link.path}
                   to={link.path}
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.path)
-                      ? 'bg-primary-50 text-primary-700'
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${isActive(link.path)
+                      ? 'bg-teal-50 text-teal-700'
                       : 'text-gray-600 hover:bg-gray-50'
                     }`}
                 >
@@ -142,10 +139,10 @@ export function Navbar() {
                     <Link
                       to="/profile"
                       onClick={closeMobileMenu}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
+                      <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
+                        <User className="w-4 h-4 text-teal-600" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900">{user.displayName || 'Profile'}</p>
@@ -154,7 +151,7 @@ export function Navbar() {
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-1"
                     >
                       <LogOut className="w-5 h-5" />
                       Sign Out
@@ -164,9 +161,8 @@ export function Navbar() {
                   <Link
                     to="/login"
                     onClick={closeMobileMenu}
-                    className="flex items-center justify-center gap-2 mx-4 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium"
+                    className="btn-primary w-full text-center"
                   >
-                    <LogIn className="w-4 h-4" />
                     Sign In
                   </Link>
                 )}
