@@ -92,13 +92,13 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-pink-50/30">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Service Warning */}
         {!isHealthy && (
-          <div className="mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-500" />
-            <p className="text-sm text-amber-700">
+          <div className="mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-500" />
+            <p className="text-sm text-yellow-700">
               {!serviceStatus.modelLoaded && 'AI model loading... '}
               {!serviceStatus.databaseConnected && 'Database connecting...'}
             </p>
@@ -107,15 +107,15 @@ export function Dashboard() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Overview of your skin analyses</p>
+          <h1 className="text-2xl font-bold text-pink-900">Dashboard</h1>
+          <p className="text-pink-600 mt-1">Overview of your skin analyses</p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="stat-card">
             <div className="flex items-center gap-3">
-              <div className="icon-box icon-box-teal">
+              <div className="icon-box icon-box-pink">
                 <Activity className="w-5 h-5" />
               </div>
               <div>
@@ -126,7 +126,7 @@ export function Dashboard() {
           </div>
           <div className="stat-card">
             <div className="flex items-center gap-3">
-              <div className="icon-box bg-amber-50 text-amber-600">
+              <div className="icon-box bg-yellow-50 text-yellow-600">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
@@ -148,7 +148,7 @@ export function Dashboard() {
           </div>
           <div className="stat-card">
             <div className="flex items-center gap-3">
-              <div className="icon-box bg-emerald-50 text-emerald-600">
+              <div className="icon-box bg-green-50 text-green-600">
                 <CheckCircle className="w-5 h-5" />
               </div>
               <div>
@@ -165,7 +165,7 @@ export function Dashboard() {
             <h2 className="section-title">Recent Analyses</h2>
             <div className="flex items-center gap-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
                 <input
                   type="text"
                   placeholder="Search..."
@@ -203,7 +203,7 @@ export function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-gray-500 uppercase border-b border-gray-100">
+                  <tr className="text-left text-xs text-pink-500 uppercase border-b border-pink-100">
                     <th className="pb-3 font-medium">Image</th>
                     <th className="pb-3 font-medium">Condition</th>
                     <th className="pb-3 font-medium">Date</th>
@@ -212,32 +212,32 @@ export function Dashboard() {
                     <th className="pb-3 font-medium text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-pink-50">
                   {filteredAnalyses.map((analysis) => {
                     const badge = getStatusBadge(analysis.confidence);
                     return (
-                      <tr key={analysis.id} className="hover:bg-gray-50/50">
+                      <tr key={analysis.id} className="hover:bg-pink-50/50">
                         <td className="py-3">
                           {analysis.image_preview ? (
-                            <div className="w-10 h-10 rounded overflow-hidden bg-gray-100">
+                            <div className="w-10 h-10 rounded overflow-hidden bg-pink-50">
                               <img src={`data:image/jpeg;base64,${analysis.image_preview}`} alt="" className="w-full h-full object-cover" />
                             </div>
                           ) : (
-                            <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center">
-                              <ImageIcon className="w-5 h-5 text-gray-400" />
+                            <div className="w-10 h-10 rounded bg-pink-50 flex items-center justify-center">
+                              <ImageIcon className="w-5 h-5 text-pink-300" />
                             </div>
                           )}
                         </td>
-                        <td className="py-3 font-medium text-gray-900">{analysis.primary_condition}</td>
-                        <td className="py-3 text-gray-500">{new Date(analysis.timestamp).toLocaleDateString()}</td>
-                        <td className="py-3 text-gray-900">{analysis.confidence.toFixed(1)}%</td>
+                        <td className="py-3 font-medium text-pink-900">{analysis.primary_condition}</td>
+                        <td className="py-3 text-pink-600">{new Date(analysis.timestamp).toLocaleDateString()}</td>
+                        <td className="py-3 text-pink-900">{analysis.confidence.toFixed(1)}%</td>
                         <td className="py-3">
                           <span className={`badge ${badge.class}`}>{badge.label}</span>
                         </td>
                         <td className="py-3 text-right">
                           <button
                             onClick={() => window.location.href = `/scan/${analysis.id}`}
-                            className="p-1.5 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+                            className="p-1.5 rounded text-pink-400 hover:text-pink-600 hover:bg-pink-50"
                           >
                             <ExternalLink className="w-4 h-4" />
                           </button>

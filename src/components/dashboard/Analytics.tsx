@@ -82,7 +82,7 @@ export function Analytics() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#FAFAFA] py-8 px-4">
+            <div className="min-h-screen bg-pink-50/30 py-8 px-4">
                 <div className="max-w-5xl mx-auto space-y-4">
                     <div className="skeleton h-8 w-48" />
                     <div className="grid grid-cols-3 gap-4">
@@ -95,13 +95,13 @@ export function Analytics() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] py-8 px-4">
+        <div className="min-h-screen bg-pink-50/30 py-8 px-4">
             <div className="max-w-5xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-                        <p className="text-gray-600 mt-1">Track your analysis history</p>
+                        <h1 className="text-2xl font-bold text-pink-900">Analytics</h1>
+                        <p className="text-pink-600 mt-1">Track your analysis history</p>
                     </div>
                     <div className="flex gap-3">
                         <select
@@ -124,7 +124,7 @@ export function Analytics() {
                 <div className="grid md:grid-cols-3 gap-4 mb-8">
                     <div className="stat-card">
                         <div className="flex items-center gap-3">
-                            <div className="icon-box icon-box-teal">
+                            <div className="icon-box icon-box-pink">
                                 <Activity className="w-5 h-5" />
                             </div>
                             <div>
@@ -135,7 +135,7 @@ export function Analytics() {
                     </div>
                     <div className="stat-card">
                         <div className="flex items-center gap-3">
-                            <div className="icon-box bg-emerald-50 text-emerald-600">
+                            <div className="icon-box bg-green-50 text-green-600">
                                 <TrendingUp className="w-5 h-5" />
                             </div>
                             <div>
@@ -170,16 +170,16 @@ export function Analytics() {
                         <div className="space-y-4">
                             {conditionStats.map((stat) => (
                                 <div key={stat.condition} className="flex items-center gap-4">
-                                    <span className="w-36 text-sm text-gray-700 truncate font-medium">
+                                    <span className="w-36 text-sm text-pink-700 truncate font-medium">
                                         {stat.condition}
                                     </span>
-                                    <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className="flex-1 h-2.5 bg-pink-100 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-teal-500 rounded-full transition-all duration-500"
+                                            className="h-full bg-pink-500 rounded-full transition-all duration-500"
                                             style={{ width: `${stat.percentage}%` }}
                                         />
                                     </div>
-                                    <span className="w-20 text-sm text-gray-600 text-right">
+                                    <span className="w-20 text-sm text-pink-600 text-right">
                                         {stat.count} ({stat.percentage.toFixed(0)}%)
                                     </span>
                                 </div>
@@ -192,15 +192,15 @@ export function Analytics() {
                 <div className="card p-6">
                     <h2 className="section-title mb-6">Recent Activity</h2>
                     {filteredAnalyses.length === 0 ? (
-                        <p className="text-center py-8 text-gray-500 text-sm">No activity yet</p>
+                        <p className="text-center py-8 text-pink-500 text-sm">No activity yet</p>
                     ) : (
                         <div className="space-y-2 max-h-[300px] overflow-y-auto">
                             {filteredAnalyses.slice(0, 10).map((analysis) => (
-                                <div key={analysis.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50">
-                                    <div className="w-2 h-2 rounded-full bg-teal-500" />
+                                <div key={analysis.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-pink-50">
+                                    <div className="w-2 h-2 rounded-full bg-pink-500" />
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-gray-800 text-sm truncate">{analysis.primary_condition}</p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="font-medium text-pink-800 text-sm truncate">{analysis.primary_condition}</p>
+                                        <p className="text-xs text-pink-500">
                                             {new Date(analysis.timestamp).toLocaleDateString()}
                                         </p>
                                     </div>

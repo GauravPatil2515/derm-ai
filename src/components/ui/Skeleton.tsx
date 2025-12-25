@@ -5,7 +5,7 @@ interface SkeletonProps {
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => (
-    <div className={`bg-gray-100 rounded animate-pulse ${className}`} />
+    <div className={`bg-pink-50 rounded animate-pulse ${className}`} />
 );
 
 export const TableRowSkeleton: React.FC = () => (

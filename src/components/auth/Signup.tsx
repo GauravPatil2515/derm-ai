@@ -52,30 +52,30 @@ export function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-pink-50/30 p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-teal-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-pink-600 flex items-center justify-center">
               <span className="text-white font-bold">D</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">DermAI</span>
+            <span className="text-xl font-bold text-pink-900">DermAI</span>
           </Link>
         </div>
 
         {/* Card */}
         <div className="card p-6">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Create account</h2>
-            <p className="text-gray-600 text-sm mt-1">Start your skin health journey</p>
+            <h2 className="text-xl font-bold text-pink-900">Create account</h2>
+            <p className="text-pink-600 text-sm mt-1">Start your skin health journey</p>
           </div>
 
           {/* Google Sign-Up */}
           <button
             onClick={handleGoogleSignup}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 mb-4 text-sm font-medium"
+            className="w-full flex items-center justify-center gap-3 border border-pink-200 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-pink-50 transition-colors disabled:opacity-50 mb-4 text-sm font-medium"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -89,17 +89,17 @@ export function Signup() {
           {/* Divider */}
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full border-t border-pink-100"></div>
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-white text-gray-500">or</span>
+              <span className="px-2 bg-white text-pink-400">or</span>
             </div>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-pink-800 mb-1">Email</label>
               <input
                 type="email"
                 value={email}
@@ -110,7 +110,7 @@ export function Signup() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-pink-800 mb-1">Password</label>
               <input
                 type="password"
                 value={password}
@@ -119,10 +119,10 @@ export function Signup() {
                 className="input"
                 placeholder="••••••••"
               />
-              <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
+              <p className="text-xs text-pink-500 mt-1">At least 6 characters</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium text-pink-800 mb-1">Confirm Password</label>
               <input
                 type="password"
                 value={confirmPassword}
@@ -138,9 +138,9 @@ export function Signup() {
             </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-600">
+          <p className="mt-4 text-center text-sm text-pink-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-teal-600 hover:text-teal-700 font-medium">
+            <Link to="/login" className="text-pink-700 hover:text-pink-800 font-medium">
               Sign in
             </Link>
           </p>

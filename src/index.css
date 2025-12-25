@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    --color-bg: #FAFAFA;
+    --color-bg: #FFFBFC;
     --color-card: #FFFFFF;
     --color-primary: #1A1A1A;
     --color-secondary: #6B7280;
-    --color-accent: #0D9488;
-    --color-accent-light: #14B8A6;
-    --color-border: #E5E7EB;
-    --color-highlight: #F0FDFA;
+    --color-accent: #DB2777;
+    --color-accent-light: #EC4899;
+    --color-border: #FCE7F3;
+    --color-highlight: #FDF2F8;
   }
 
   html {
@@ -21,11 +21,10 @@
   body {
     @apply antialiased text-gray-900;
     background-color: var(--color-bg);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   ::selection {
-    @apply bg-teal-100 text-teal-900;
+    @apply bg-pink-100 text-pink-900;
   }
 }
 
@@ -33,20 +32,20 @@
 
   /* Clean Card */
   .card {
-    @apply bg-white rounded-lg border border-gray-200;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    @apply bg-white rounded-lg border border-pink-100;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
   }
 
   .card:hover {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
   }
 
-  /* Primary Button - Solid, no gradient */
+  /* Primary Button */
   .btn-primary {
     @apply px-5 py-2.5 rounded-lg font-medium text-white;
-    @apply bg-teal-600 hover:bg-teal-700;
+    @apply bg-pink-600 hover:bg-pink-700;
     @apply transition-colors duration-150;
-    @apply focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2;
   }
 
   .btn-primary:disabled {
@@ -56,7 +55,7 @@
   /* Secondary Button */
   .btn-secondary {
     @apply px-5 py-2.5 rounded-lg font-medium;
-    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+    @apply bg-pink-50 text-pink-700 hover:bg-pink-100;
     @apply transition-colors duration-150;
   }
 
@@ -70,10 +69,10 @@
   /* Clean Input */
   .input {
     @apply w-full px-4 py-2.5 rounded-lg;
-    @apply border border-gray-300 bg-white;
+    @apply border border-pink-200 bg-white;
     @apply text-gray-900 placeholder:text-gray-400;
     @apply transition-colors duration-150;
-    @apply focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500;
+    @apply focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500;
   }
 
   /* Badge */
@@ -82,11 +81,11 @@
   }
 
   .badge-success {
-    @apply bg-emerald-50 text-emerald-700;
+    @apply bg-green-50 text-green-700;
   }
 
   .badge-warning {
-    @apply bg-amber-50 text-amber-700;
+    @apply bg-yellow-50 text-yellow-700;
   }
 
   .badge-danger {
@@ -94,7 +93,7 @@
   }
 
   .badge-info {
-    @apply bg-teal-50 text-teal-700;
+    @apply bg-pink-50 text-pink-700;
   }
 
   /* Stat Card */
@@ -112,20 +111,20 @@
 
   /* Section */
   .section-title {
-    @apply text-lg font-semibold text-gray-900;
+    @apply text-lg font-semibold text-pink-900;
   }
 
   .section-subtitle {
-    @apply text-sm text-gray-500;
+    @apply text-sm text-pink-600;
   }
 
   /* Avatar */
   .avatar {
-    @apply w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center;
+    @apply w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center;
   }
 
   .avatar-icon {
-    @apply w-5 h-5 text-teal-600;
+    @apply w-5 h-5 text-pink-600;
   }
 
   /* Icon Container */
@@ -133,8 +132,8 @@
     @apply w-10 h-10 rounded-lg flex items-center justify-center;
   }
 
-  .icon-box-teal {
-    @apply bg-teal-50 text-teal-600;
+  .icon-box-pink {
+    @apply bg-pink-50 text-pink-600;
   }
 
   .icon-box-gray {
@@ -147,7 +146,7 @@
   }
 
   .empty-state-icon {
-    @apply w-12 h-12 mx-auto text-gray-300 mb-4;
+    @apply w-12 h-12 mx-auto text-pink-300 mb-4;
   }
 
   .empty-state-title {
@@ -160,23 +159,16 @@
 
   /* Loading Spinner */
   .spinner {
-    @apply w-5 h-5 border-2 border-gray-200 border-t-teal-600 rounded-full animate-spin;
+    @apply w-5 h-5 border-2 border-pink-200 border-t-pink-600 rounded-full animate-spin;
   }
 
-  /* Simple skeleton */
+  /* Skeleton */
   .skeleton {
-    @apply bg-gray-100 rounded animate-pulse;
+    @apply bg-pink-50 rounded animate-pulse;
   }
 }
 
 @layer utilities {
-
-  /* Prose-like content spacing */
-  .content-spacing>*+* {
-    margin-top: 1rem;
-  }
-
-  /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

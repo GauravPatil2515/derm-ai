@@ -154,7 +154,7 @@ export function Chat() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-pink-50/30">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="card p-4 mb-4">
@@ -164,7 +164,7 @@ export function Chat() {
                 <Bot className="avatar-icon" />
               </div>
               <div>
-                <h1 className="font-semibold text-gray-900">DermAI Assistant</h1>
+                <h1 className="font-semibold text-pink-900">DermAI Assistant</h1>
                 <p className="text-xs text-gray-500">
                   {isConnected ? 'Online' : 'Connecting...'}
                 </p>
@@ -192,17 +192,17 @@ export function Chat() {
                     key={message.id}
                     className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.role === 'assistant' ? 'bg-teal-100' : 'bg-gray-200'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.role === 'assistant' ? 'bg-pink-100' : 'bg-pink-500'
                       }`}>
                       {message.role === 'assistant' ? (
-                        <Bot className="w-4 h-4 text-teal-600" />
+                        <Bot className="w-4 h-4 text-pink-600" />
                       ) : (
-                        <User className="w-4 h-4 text-gray-600" />
+                        <User className="w-4 h-4 text-white" />
                       )}
                     </div>
                     <div className={`max-w-[75%] px-4 py-2.5 rounded-lg text-sm ${message.role === 'user'
-                        ? 'bg-teal-600 text-white'
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'bg-pink-600 text-white'
+                        : 'bg-pink-50 text-gray-800'
                       }`}>
                       {message.content}
                     </div>
@@ -210,12 +210,12 @@ export function Chat() {
                 ))}
                 {isLoading && (
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-teal-600" />
+                    <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-pink-600" />
                     </div>
-                    <div className="bg-gray-100 px-4 py-2.5 rounded-lg flex items-center gap-2">
-                      <Loader className="w-4 h-4 animate-spin text-gray-500" />
-                      <span className="text-sm text-gray-500">Thinking...</span>
+                    <div className="bg-pink-50 px-4 py-2.5 rounded-lg flex items-center gap-2">
+                      <Loader className="w-4 h-4 animate-spin text-pink-500" />
+                      <span className="text-sm text-pink-600">Thinking...</span>
                     </div>
                   </div>
                 )}
@@ -225,20 +225,20 @@ export function Chat() {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className="p-4 border-t border-gray-100 flex gap-3">
+          <form onSubmit={handleSubmit} className="p-4 border-t border-pink-100 flex gap-3">
             <div className="relative flex-1">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={isListening ? "Listening..." : "Type your message..."}
-                className={`input pr-10 ${isListening ? 'border-teal-500 ring-1 ring-teal-500' : ''}`}
+                className={`input pr-10 ${isListening ? 'border-pink-500 ring-1 ring-pink-500' : ''}`}
                 disabled={isLoading}
               />
               <button
                 type="button"
                 onClick={toggleListening}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded ${isListening ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded ${isListening ? 'text-pink-600' : 'text-gray-400 hover:text-gray-600'
                   }`}
               >
                 {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}

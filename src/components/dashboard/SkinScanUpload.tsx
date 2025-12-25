@@ -104,8 +104,8 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
 
       <div
         className={`relative flex min-h-[240px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${dragActive
-            ? 'border-teal-400 bg-teal-50'
-            : 'border-gray-300 hover:border-gray-400 bg-gray-50/50'
+            ? 'border-pink-400 bg-pink-50'
+            : 'border-pink-200 hover:border-pink-300 bg-pink-50/30'
           }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -140,16 +140,16 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center py-8 px-4 text-center">
-            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
-              <Upload className="w-6 h-6 text-gray-400" />
+            <div className="w-12 h-12 rounded-lg bg-pink-100 flex items-center justify-center mb-4">
+              <Upload className="w-6 h-6 text-pink-400" />
             </div>
-            <p className="font-medium text-gray-700 mb-1">
+            <p className="font-medium text-pink-800 mb-1">
               Drop your image here
             </p>
-            <p className="text-sm text-gray-500 mb-3">
+            <p className="text-sm text-pink-600 mb-3">
               or click to browse
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-pink-400">
               JPEG, PNG • Max 10MB
             </p>
           </div>
@@ -159,14 +159,14 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
       {selectedFile && !isUploading && (
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-              <Image className="w-5 h-5 text-gray-500" />
+            <div className="w-10 h-10 rounded-lg bg-pink-50 flex items-center justify-center">
+              <Image className="w-5 h-5 text-pink-500" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-700 truncate max-w-[180px]">
+              <p className="text-sm font-medium text-pink-800 truncate max-w-[180px]">
                 {selectedFile.name}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-pink-500">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>

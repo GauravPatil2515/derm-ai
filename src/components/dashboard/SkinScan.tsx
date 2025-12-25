@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, WifiOff, Upload, Camera, Shield, Info } from 'lucide-react';
+import { AlertCircle, WifiOff, Camera, Shield, Info } from 'lucide-react';
 import { SkinScanUpload } from './SkinScanUpload';
 import { useService } from '../../lib/ServiceContext';
 import { useToast } from '../../lib/ToastContext';
@@ -106,24 +106,24 @@ export function SkinScan() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-pink-50/30">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Skin Analysis</h1>
-          <p className="text-gray-600 mt-1">Upload an image for AI-powered skin condition analysis</p>
+          <h1 className="text-2xl font-bold text-pink-900">Skin Analysis</h1>
+          <p className="text-pink-600 mt-1">Upload an image for AI-powered skin condition analysis</p>
         </div>
 
         {/* Login Prompt */}
         {!user && (
-          <div className="mb-6 p-4 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-between">
+          <div className="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Info className="w-5 h-5 text-teal-600" />
-              <p className="text-sm text-teal-800">Sign in to save your analysis history</p>
+              <Info className="w-5 h-5 text-blue-600" />
+              <p className="text-sm text-blue-800">Sign in to save your analysis history</p>
             </div>
             <button
               onClick={() => navigate('/login')}
-              className="text-sm font-medium text-teal-700 hover:text-teal-900"
+              className="text-sm font-medium text-blue-700 hover:text-blue-900"
             >
               Sign In →
             </button>
@@ -132,11 +132,11 @@ export function SkinScan() {
 
         {/* Connection Warning */}
         {!isBackendConnected && (
-          <div className="mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-3">
-            <WifiOff className="w-5 h-5 text-amber-600" />
+          <div className="mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200 flex items-center gap-3">
+            <WifiOff className="w-5 h-5 text-yellow-600" />
             <div>
-              <p className="text-sm font-medium text-amber-800">Connection Issue</p>
-              <p className="text-xs text-amber-600">Unable to connect. Retrying...</p>
+              <p className="text-sm font-medium text-yellow-800">Connection Issue</p>
+              <p className="text-xs text-yellow-600">Unable to connect. Retrying...</p>
             </div>
           </div>
         )}
@@ -146,7 +146,7 @@ export function SkinScan() {
           {isAnalyzing ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="spinner w-8 h-8 mb-4"></div>
-              <p className="text-gray-600">Analyzing your image...</p>
+              <p className="text-pink-600">Analyzing your image...</p>
               <p className="text-sm text-gray-400 mt-1">This may take a few seconds</p>
             </div>
           ) : (
@@ -174,12 +174,12 @@ export function SkinScan() {
         <div className="grid md:grid-cols-2 gap-4">
           <div className="card p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="icon-box icon-box-teal">
+              <div className="icon-box icon-box-pink">
                 <Camera className="w-5 h-5" />
               </div>
-              <h3 className="font-medium text-gray-900">Photo Guidelines</h3>
+              <h3 className="font-medium text-pink-800">Photo Guidelines</h3>
             </div>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <ul className="space-y-2 text-sm text-pink-700">
               <li>• Use good lighting, preferably natural</li>
               <li>• Keep camera steady and focused</li>
               <li>• Capture the affected area clearly</li>
@@ -189,12 +189,12 @@ export function SkinScan() {
 
           <div className="card p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="icon-box bg-amber-50 text-amber-600">
+              <div className="icon-box bg-blue-50 text-blue-600">
                 <Shield className="w-5 h-5" />
               </div>
-              <h3 className="font-medium text-gray-900">Important Notice</h3>
+              <h3 className="font-medium text-pink-800">Important Notice</h3>
             </div>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <ul className="space-y-2 text-sm text-pink-700">
               <li>• For educational purposes only</li>
               <li>• Not a substitute for medical advice</li>
               <li>• Consult a dermatologist for diagnosis</li>
