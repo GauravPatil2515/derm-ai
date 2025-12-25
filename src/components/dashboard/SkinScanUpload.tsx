@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Image, FileImage } from 'lucide-react';
 import { useService } from '../../lib/ServiceContext';
 
 interface SkinScanUploadProps {
@@ -27,7 +27,7 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
 
   const validateFile = (file: File): boolean => {
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 10 * 1024 * 1024;
 
     if (!validTypes.includes(file.type)) {
       setError('Please upload a valid image file (JPEG or PNG)');
@@ -49,13 +49,12 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
     }
 
     setError(null);
-    
+
     if (!validateFile(file)) {
       return;
     }
 
     try {
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -93,8 +92,7 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
       setIsUploading(true);
       setError(null);
       await onUpload(selectedFile);
-      
-      // Reset form after successful upload
+
       setSelectedFile(null);
       setPreview(null);
       if (inputRef.current) {
@@ -103,7 +101,6 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to analyze image. Please try again.';
       setError(errorMessage);
-      console.error('Upload error:', err);
     } finally {
       setIsUploading(false);
     }
@@ -120,28 +117,20 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
 
   return (
     <div className="w-full">
-      {!isHealthy && (
-        <div className="mb-4 rounded-lg bg-yellow-50 p-4">
-          <p className="text-yellow-800">
-            Service is currently unavailable. Please try again later.
-          </p>
-        </div>
-      )}
-
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-4">
-          <p className="text-red-800">{error}</p>
+        <div className="mb-4 p-4 rounded-lg bg-red-50 border border-red-100 flex items-center gap-3">
+          <span className="text-red-500">⚠️</span>
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       <div
-        className={`relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
-          dragActive
-            ? 'border-pink-400 bg-pink-50'
+        className={`relative flex min-h-[280px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all duration-200 ${dragActive
+            ? 'border-primary-400 bg-primary-50/50'
             : isUploading
-            ? 'border-pink-300 bg-pink-50'
-            : 'border-pink-200 hover:border-pink-300'
-        }`}
+              ? 'border-primary-300 bg-primary-50/30'
+              : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50/50'
+          }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
@@ -158,53 +147,78 @@ export function SkinScanUpload({ onUpload }: SkinScanUploadProps) {
         />
 
         {preview ? (
-          <div className="relative w-full p-4">
+          <div className="relative w-full p-6">
             {!isUploading && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemove();
                 }}
-                className="absolute right-6 top-6 z-10 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                className="absolute right-8 top-8 z-10 p-2 rounded-full bg-gray-900/80 text-white hover:bg-gray-900 transition-colors shadow-lg"
               >
-                <X className="h-4 w-4" />
+                <X className="w-4 h-4" />
               </button>
             )}
             <img
               src={preview}
               alt="Preview"
-              className="mx-auto max-h-[300px] rounded-lg object-contain"
+              className="mx-auto max-h-[280px] rounded-lg object-contain shadow-md"
             />
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8">
-            <Upload className="mb-4 h-8 w-8 text-pink-400" />
-            <p className="mb-2 text-sm text-pink-600">
-              {isUploading 
-                ? 'Uploading and analyzing your image...'
-                : 'Drag and drop your image here, or click to select'
-              }
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center mb-6">
+              <Upload className="w-7 h-7 text-primary-500" />
+            </div>
+            <p className="text-lg font-medium text-gray-700 mb-2">
+              {isUploading ? 'Processing...' : 'Drop your image here'}
             </p>
-            <p className="text-xs text-pink-400">Supports: JPEG, PNG (max 10MB)</p>
+            <p className="text-sm text-gray-500 mb-4">
+              or click to browse from your device
+            </p>
+            <div className="flex items-center gap-4 text-xs text-gray-400">
+              <span className="flex items-center gap-1">
+                <FileImage className="w-4 h-4" />
+                JPEG, PNG
+              </span>
+              <span>•</span>
+              <span>Max 10MB</span>
+            </div>
           </div>
         )}
 
         {isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
             <div className="flex flex-col items-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-500 border-t-transparent"></div>
-              <p className="mt-2 text-sm text-pink-600">Analyzing image...</p>
+              <div className="relative">
+                <div className="w-12 h-12 rounded-full border-4 border-primary-100" />
+                <div className="absolute inset-0 w-12 h-12 rounded-full border-4 border-primary-500 border-t-transparent animate-spin" />
+              </div>
+              <p className="mt-4 text-sm font-medium text-gray-600">Analyzing...</p>
             </div>
           </div>
         )}
       </div>
 
       {selectedFile && !isUploading && (
-        <div className="mt-4 flex justify-end">
+        <div className="mt-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+              <Image className="w-5 h-5 text-gray-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
+                {selectedFile.name}
+              </p>
+              <p className="text-xs text-gray-500">
+                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+          </div>
           <button
             onClick={handleSubmit}
             disabled={!isHealthy || isUploading}
-            className="rounded-lg bg-pink-500 px-4 py-2 text-white hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-premium"
           >
             Analyze Image
           </button>

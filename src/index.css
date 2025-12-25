@@ -1,3 +1,253 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    --gradient-medical: linear-gradient(135deg, #14b8a6 0%, #6366f1 100%);
+    --gradient-warm: linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #db2777 100%);
+  }
+
+  body {
+    @apply antialiased;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fdf2f8 100%);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    @apply bg-primary-500/20 text-primary-900;
+  }
+}
+
+@layer components {
+  /* Premium Card Styles */
+  .card-premium {
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-premium border border-white/50;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .card-premium:hover {
+    @apply shadow-premium-lg -translate-y-1;
+  }
+
+  /* Glassmorphism Card */
+  .card-glass {
+    @apply bg-white/70 backdrop-blur-md rounded-2xl;
+    @apply border border-white/30 shadow-xl;
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  /* Premium Button */
+  .btn-premium {
+    @apply relative px-6 py-3 rounded-xl font-semibold text-white overflow-hidden;
+    @apply transition-all duration-300 ease-out;
+    @apply shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0;
+    background: var(--gradient-primary);
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+  }
+
+  .btn-premium:hover {
+    @apply scale-[1.02];
+    box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.5);
+  }
+
+  .btn-premium:active {
+    @apply scale-[0.98];
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply px-6 py-3 rounded-xl font-semibold;
+    @apply bg-white/80 text-primary-600 border-2 border-primary-200;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:bg-primary-50 hover:border-primary-300 hover:shadow-md;
+  }
+
+  /* Icon Button */
+  .btn-icon {
+    @apply p-3 rounded-xl transition-all duration-200;
+    @apply hover:bg-primary-50 hover:text-primary-600;
+    @apply active:scale-95;
+  }
+
+  /* Premium Input */
+  .input-premium {
+    @apply w-full px-4 py-3 rounded-xl bg-white/80 backdrop-blur-sm;
+    @apply border-2 border-gray-200 outline-none;
+    @apply transition-all duration-200;
+    @apply focus:border-primary-400 focus:ring-4 focus:ring-primary-100;
+    @apply placeholder:text-gray-400;
+  }
+
+  /* Skeleton Loading */
+  .skeleton {
+    @apply relative overflow-hidden bg-gray-200 rounded-lg;
+  }
+
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  /* Animated Border */
+  .border-gradient {
+    position: relative;
+    background: white;
+    border-radius: 1rem;
+  }
+
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(1rem + 2px);
+    background: var(--gradient-primary);
+    z-index: -1;
+    opacity: 0.5;
+  }
+
+  /* Stats Card */
+  .stat-card {
+    @apply card-premium p-6 text-center;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold text-gradient;
+  }
+
+  .stat-label {
+    @apply text-sm text-gray-500 mt-1;
+  }
+
+  /* Feature Card */
+  .feature-card {
+    @apply card-premium p-6 flex flex-col items-center text-center gap-4;
+  }
+
+  .feature-icon {
+    @apply w-14 h-14 rounded-2xl flex items-center justify-center;
+    @apply bg-gradient-to-br from-primary-500 to-accent-500 text-white;
+    @apply shadow-lg;
+  }
+
+  /* Progress Ring */
+  .progress-ring {
+    @apply relative inline-flex items-center justify-center;
+  }
+
+  .progress-ring svg {
+    @apply transform -rotate-90;
+  }
+
+  /* Toast Animations */
+  .toast-enter {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  /* Page Transitions */
+  .page-enter {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  /* Floating Animation for Hero Elements */
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Badge Styles */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .badge-warning {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .badge-info {
+    @apply bg-primary-100 text-primary-700;
+  }
+
+  /* Confidence Meter */
+  .confidence-meter {
+    @apply h-3 rounded-full bg-gray-200 overflow-hidden;
+  }
+
+  .confidence-fill {
+    @apply h-full rounded-full transition-all duration-1000 ease-out;
+    background: var(--gradient-primary);
+  }
+
+  /* Chat Bubbles */
+  .chat-bubble-user {
+    @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white;
+    @apply rounded-2xl rounded-br-md px-4 py-3 max-w-[80%] ml-auto;
+  }
+
+  .chat-bubble-assistant {
+    @apply bg-white/80 backdrop-blur-sm border border-gray-100;
+    @apply rounded-2xl rounded-bl-md px-4 py-3 max-w-[80%] shadow-sm;
+  }
+
+  /* Section Headers */
+  .section-header {
+    @apply flex items-center gap-3 mb-6;
+  }
+
+  .section-icon {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center;
+    @apply bg-gradient-to-br from-primary-500 to-accent-500 text-white shadow-md;
+  }
+
+  .section-title {
+    @apply text-xl font-bold text-gray-800;
+  }
+}
+
+@layer utilities {
+  /* Gradient backgrounds */
+  .bg-gradient-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .bg-gradient-mesh {
+    background-color: #f8fafc;
+    background-image: 
+      radial-gradient(at 40% 20%, hsla(240, 91%, 85%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(330, 91%, 85%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(240, 91%, 85%, 0.2) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(330, 91%, 85%, 0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(240, 91%, 85%, 0.3) 0px, transparent 50%);
+  }
+
+  /* Scrollbar Styling */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+    @apply hover:bg-gray-400;
+  }
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, Calendar, MessageSquare, Search, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Video, Calendar, MessageSquare, Search, ExternalLink, Image as ImageIcon, Activity, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { DashboardCard } from './DashboardCard';
 import { useService } from '../../lib/ServiceContext';
 import { useAuth } from '../../lib/AuthContext';
@@ -37,15 +37,13 @@ export function Dashboard() {
   const { status: serviceStatus, isHealthy } = useService();
   const { user, loading: authLoading } = useAuth();
 
-  // Use user id if available, else anonymous (but dashboard usually implies personal history)
-  // If not logged in, we might show empty history or prompt.
   const userId = user ? user.uid : 'anonymous';
 
   useEffect(() => {
     if (!authLoading) {
       fetchAnalysisHistory();
     }
-  }, [authLoading, userId]); // Re-fetch when user changes
+  }, [authLoading, userId]);
 
   const fetchAnalysisHistory = async () => {
     try {
@@ -61,7 +59,6 @@ export function Dashboard() {
 
       setAnalyses(data.history);
 
-      // Calculate stats
       const stats = {
         total_scans: data.history.length,
         pending_review: data.history.filter((a: SkinAnalysis) => a.confidence < 0.7).length,
@@ -72,7 +69,6 @@ export function Dashboard() {
       setStats(stats);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch analysis history');
-      console.error('Error fetching analysis history:', err);
     } finally {
       setIsLoading(false);
     }
@@ -95,99 +91,111 @@ export function Dashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  const getStatusColor = (confidence: number) => {
+  const getStatusBadge = (confidence: number) => {
     const status = getStatusFromConfidence(confidence);
     switch (status) {
-      case 'urgent': return 'bg-red-100 text-red-800';
-      case 'pending': return 'bg-pink-100 text-pink-800';
-      case 'reviewed': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'urgent': return { color: 'bg-red-100 text-red-700', label: 'Urgent' };
+      case 'pending': return { color: 'bg-amber-100 text-amber-700', label: 'Pending' };
+      case 'reviewed': return { color: 'bg-emerald-100 text-emerald-700', label: 'Reviewed' };
     }
   };
 
   return (
-    <div className="min-h-screen bg-pink-50/30">
+    <div className="min-h-screen bg-gradient-mesh">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Service Warning */}
         {!isHealthy && (
-          <div className="mb-4 rounded-lg bg-yellow-50 p-4">
-            <div className="flex items-center">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">Service Status</h3>
-                <div className="mt-2 text-sm text-yellow-700">
-                  <ul className="list-inside list-disc space-y-1">
-                    {!serviceStatus.modelLoaded && (
-                      <li>AI model is initializing...</li>
-                    )}
-                    {!serviceStatus.databaseConnected && (
-                      <li>Database connection is being established...</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
+          <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">Service Initializing</p>
+              <p className="text-xs text-amber-600">
+                {!serviceStatus.modelLoaded && 'AI model is loading... '}
+                {!serviceStatus.databaseConnected && 'Database connecting...'}
+              </p>
             </div>
           </div>
         )}
 
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-pink-900">Medical Dashboard</h1>
-          <p className="mt-1 text-pink-600">Overview of patient skin analyses and consultations</p>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">Overview of your skin analyses and history</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg bg-white p-6 shadow-sm border border-pink-100">
-            <p className="text-sm font-medium text-pink-600">Total Scans</p>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-3xl font-semibold text-pink-900">{stats.total_scans}</p>
+        <div className="mb-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="card-premium p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
+                <Activity className="w-6 h-6 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Scans</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total_scans}</p>
+              </div>
             </div>
           </div>
-          <div className="rounded-lg bg-white p-6 shadow-sm border border-pink-100">
-            <p className="text-sm font-medium text-pink-600">Pending Review</p>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-3xl font-semibold text-pink-900">{stats.pending_review}</p>
+          <div className="card-premium p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Pending</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.pending_review}</p>
+              </div>
             </div>
           </div>
-          <div className="rounded-lg bg-white p-6 shadow-sm border border-pink-100">
-            <p className="text-sm font-medium text-pink-600">Urgent Cases</p>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-3xl font-semibold text-pink-900">{stats.urgent_cases}</p>
+          <div className="card-premium p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Urgent</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.urgent_cases}</p>
+              </div>
             </div>
           </div>
-          <div className="rounded-lg bg-white p-6 shadow-sm border border-pink-100">
-            <p className="text-sm font-medium text-pink-600">Reviewed</p>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-3xl font-semibold text-pink-900">{stats.reviewed}</p>
+          <div className="card-premium p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Reviewed</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.reviewed}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Scan History Section */}
-        <div className="mb-8 rounded-lg bg-white p-6 shadow-sm border border-pink-100">
+        {/* Scan History */}
+        <div className="card-premium p-6 mb-8">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-pink-900">Recent Skin Analyses</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Recent Analyses</h2>
 
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Search */}
+            <div className="flex flex-wrap items-center gap-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pink-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search analyses..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="rounded-md border-pink-200 pl-9 text-sm focus:border-pink-500 focus:ring-pink-500"
+                  className="input-premium pl-10 py-2 text-sm w-48"
                 />
               </div>
 
-              {/* Filter */}
               <select
                 value={selectedFilter}
                 onChange={(e) => setSelectedFilter(e.target.value)}
-                className="rounded-md border-pink-200 text-sm focus:border-pink-500 focus:ring-pink-500"
+                className="input-premium py-2 text-sm"
               >
                 <option value="all">All Status</option>
                 <option value="urgent">Urgent</option>
-                <option value="pending">Pending Review</option>
+                <option value="pending">Pending</option>
                 <option value="reviewed">Reviewed</option>
               </select>
             </div>
@@ -196,69 +204,77 @@ export function Dashboard() {
           {isLoading ? (
             <DashboardSkeleton />
           ) : error ? (
-            <div className="rounded-lg bg-red-50 p-4 text-red-800">{error}</div>
+            <div className="rounded-xl bg-red-50 p-4 text-red-700 text-sm">{error}</div>
+          ) : filteredAnalyses.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <ImageIcon className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-600 font-medium">No analyses found</p>
+              <p className="text-sm text-gray-500 mt-1">Complete your first scan to see results here</p>
+            </div>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-pink-100">
-              <table className="min-w-full divide-y divide-pink-200">
-                <thead className="bg-pink-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Image</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Report ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Condition</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Confidence</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-pink-500">Status</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase text-pink-500">Actions</th>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Image</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Report ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Condition</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Confidence</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-pink-100 bg-white">
-                  {filteredAnalyses.map((analysis) => (
-                    <tr key={analysis.id} className="hover:bg-pink-50/50">
-                      <td className="px-6 py-4">
-                        {analysis.image_preview ? (
-                          <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-pink-100">
-                            <img
-                              src={`data:image/jpeg;base64,${analysis.image_preview}`}
-                              alt="Skin condition"
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-pink-100 bg-pink-50">
-                            <ImageIcon className="h-6 w-6 text-pink-300" />
-                          </div>
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <span className="font-medium text-pink-900">{analysis.id}</span>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-pink-600">
-                        {new Date(analysis.timestamp).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-medium text-pink-900">{analysis.primary_condition}</span>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <span className="font-medium text-pink-900">{analysis.confidence.toFixed(1)}%</span>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(analysis.confidence)}`}>
-                          {getStatusFromConfidence(analysis.confidence).charAt(0).toUpperCase() +
-                            getStatusFromConfidence(analysis.confidence).slice(1)}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right">
-                        <div className="flex justify-end space-x-3">
+                <tbody className="divide-y divide-gray-50">
+                  {filteredAnalyses.map((analysis) => {
+                    const statusBadge = getStatusBadge(analysis.confidence);
+                    return (
+                      <tr key={analysis.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-4 py-4">
+                          {analysis.image_preview ? (
+                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 shadow-sm">
+                              <img
+                                src={`data:image/jpeg;base64,${analysis.image_preview}`}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <ImageIcon className="w-5 h-5 text-gray-400" />
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm font-medium text-gray-900">{analysis.id.slice(0, 20)}...</span>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-600">
+                          {new Date(analysis.timestamp).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm font-medium text-gray-900">{analysis.primary_condition}</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm font-medium text-gray-900">{analysis.confidence.toFixed(1)}%</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusBadge.color}`}>
+                            {statusBadge.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
                           <button
                             onClick={() => window.location.href = `/scan/${analysis.id}`}
-                            className="text-pink-400 hover:text-pink-500"
+                            className="p-2 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                           >
-                            <ExternalLink className="h-4 w-4" />
+                            <ExternalLink className="w-4 h-4" />
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -266,8 +282,8 @@ export function Dashboard() {
         </div>
 
         {/* Services Section */}
-        <h2 className="mb-4 text-lg font-semibold text-pink-900">Available Services</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Available Services</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <DashboardCard
             title="Video Consultation"
             description="Schedule a video call with a dermatologist"

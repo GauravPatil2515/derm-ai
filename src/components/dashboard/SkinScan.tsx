@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, WifiOff, Lock } from 'lucide-react';
+import { AlertCircle, WifiOff, Lock, Upload, Camera, Info, Shield } from 'lucide-react';
 import { SkinScanUpload } from './SkinScanUpload';
 import { useService } from '../../lib/ServiceContext';
 import { useToast } from '../../lib/ToastContext';
 import { useAuth } from '../../lib/AuthContext';
 import { API_BASE_URL } from '../../lib/config';
 
-const UPLOAD_TIMEOUT = 30000; // 30 seconds
+const UPLOAD_TIMEOUT = 30000;
 const MAX_RETRIES = 2;
 
 export function SkinScan() {
@@ -19,8 +19,6 @@ export function SkinScan() {
   const { addToast } = useToast();
   const { user } = useAuth();
 
-  // Use authenticated user ID or 'anonymous' (backend handles anonymous)
-  // BUT: We want to encourage login for history.
   const userId = user ? user.uid : 'anonymous';
 
   useEffect(() => {
@@ -30,28 +28,13 @@ export function SkinScan() {
         const data = await response.json();
         setIsBackendConnected(data.status === 'healthy');
 
-        // Additional health check feedback
         if (!data.model_loaded && !data.model_loading) {
-          // It's not loaded AND not loading -> Cold state (lazy load pending)
-          // We don't need to spam the user, just maybe a subtle hint or nothing.
-          // If they click analyze, it will trigger load.
           console.log("Model not loaded yet. Will lazy-load on first request.");
         } else if (data.model_loading) {
           addToast('AI Model is currently loading...', 'info');
         }
-
-        if (!data.database_connected) {
-          addToast('Database connection issues. Some features may be limited.', 'error');
-        }
-        if (!data.upload_folder) {
-          addToast('Storage system is initializing. Please wait...', 'info');
-        }
       } catch {
         setIsBackendConnected(false);
-        // Only show error if we were previously connected to avoid spam on startup
-        if (isBackendConnected) {
-          addToast('Unable to connect to analysis service', 'error');
-        }
       }
     };
 
@@ -103,7 +86,6 @@ export function SkinScan() {
 
           addToast('Analysis completed successfully', 'success');
 
-          // Navigate to the details page if we have an analysis ID
           if (data.result.id) {
             navigate(`/scan/${data.result.id}`);
             success = true;
@@ -113,7 +95,6 @@ export function SkinScan() {
         } catch (err) {
           retryCount++;
           if (retryCount < MAX_RETRIES) {
-            // Wait before retrying
             await new Promise(resolve => setTimeout(resolve, 2000));
             addToast(`Retrying analysis (attempt ${retryCount + 1})...`, 'info');
           } else {
@@ -132,82 +113,139 @@ export function SkinScan() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-pink-800">Skin Analysis</h1>
-        <p className="mt-2 text-pink-600">Upload an image for AI-powered skin condition analysis</p>
-      </div>
-
-      {!user && (
-        <div className="mb-6 flex items-center justify-between rounded-lg bg-blue-50 p-4 text-blue-800">
-          <div className="flex items-center">
-            <Lock className="mr-2 h-4 w-4" />
-            <span className="text-sm">Log in to save your detailed analysis history securely.</span>
-          </div>
-          <button
-            onClick={() => navigate('/login')}
-            className="text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline"
-          >
-            Log In
-          </button>
+    <div className="min-h-screen bg-gradient-mesh py-8">
+      <div className="container mx-auto max-w-4xl px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Skin Analysis</h1>
+          <p className="text-gray-600">Upload an image for AI-powered skin condition analysis</p>
         </div>
-      )}
 
-      {!isBackendConnected && (
-        <div className="mb-6 rounded-lg bg-yellow-50 p-4">
-          <div className="flex items-center">
-            <WifiOff className="mr-3 h-5 w-5 text-yellow-600" />
+        {/* Login Prompt */}
+        {!user && (
+          <div className="mb-6 p-4 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-primary-800">Save Your Analysis History</p>
+                <p className="text-xs text-primary-600">Sign in to keep track of all your scans</p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 text-sm font-medium text-primary-700 hover:text-primary-900 hover:underline"
+            >
+              Sign In →
+            </button>
+          </div>
+        )}
+
+        {/* Connection Warning */}
+        {!isBackendConnected && (
+          <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-3">
+            <WifiOff className="w-5 h-5 text-amber-600 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-yellow-800">Connection Lost</h3>
-              <p className="text-sm text-yellow-700">
-                Unable to connect to the analysis service. Please check your connection and try again.
-              </p>
+              <p className="text-sm font-medium text-amber-800">Connection Issue</p>
+              <p className="text-xs text-amber-600">Unable to connect to analysis service. Retrying...</p>
             </div>
           </div>
-        </div>
-      )}
-
-      <div className="mb-8 rounded-lg bg-white p-6 shadow-lg border border-pink-100">
-        {isAnalyzing ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-pink-500 border-t-transparent"></div>
-            <p className="mt-4 text-pink-600">Analyzing your image...</p>
-          </div>
-        ) : (
-          <SkinScanUpload onUpload={handleAnalysis} />
         )}
-      </div>
 
+        {/* Main Upload Card */}
+        <div className="mb-8">
+          <div className="card-premium p-8">
+            {isAnalyzing ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-primary-100" />
+                  <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-primary-500 border-t-transparent animate-spin" />
+                </div>
+                <p className="mt-6 text-lg font-medium text-gray-700">Analyzing your image...</p>
+                <p className="mt-2 text-sm text-gray-500">This may take a few seconds</p>
+              </div>
+            ) : (
+              <SkinScanUpload onUpload={handleAnalysis} />
+            )}
+          </div>
+        </div>
 
-      {error && (
-        <div className="mb-6 rounded-lg bg-red-50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <AlertCircle className="mr-3 h-5 w-5 text-red-600" />
+        {/* Error State */}
+        {error && (
+          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
               <div>
-                <p className="font-medium text-red-800">Analysis Failed</p>
-                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-sm font-medium text-red-800">Analysis Failed</p>
+                <p className="text-xs text-red-600">{error}</p>
               </div>
             </div>
             <button
               onClick={() => setError(null)}
-              className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
             >
-              Try Again
+              Dismiss
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="rounded-lg bg-pink-50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-pink-800">Important Notes</h2>
-        <ul className="list-inside list-disc space-y-2 text-pink-700">
-          <li>Upload clear, well-lit images of the affected area</li>
-          <li>Images should be in JPG or PNG format, under 10MB</li>
-          <li>Multiple angles may improve analysis accuracy</li>
-          <li>This tool is for educational purposes only</li>
-          <li>Always consult a healthcare professional for medical advice</li>
-        </ul>
+        {/* Guidelines */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="card-premium p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                <Camera className="w-5 h-5 text-primary-600" />
+              </div>
+              <h3 className="font-semibold text-gray-800">Photo Guidelines</h3>
+            </div>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li className="flex items-start gap-2">
+                <span className="text-primary-500 mt-0.5">•</span>
+                Use good lighting, preferably natural
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary-500 mt-0.5">•</span>
+                Keep camera steady and focused
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary-500 mt-0.5">•</span>
+                Capture the affected area clearly
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary-500 mt-0.5">•</span>
+                JPG or PNG format, under 10MB
+              </li>
+            </ul>
+          </div>
+
+          <div className="card-premium p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="font-semibold text-gray-800">Important Notice</h3>
+            </div>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 mt-0.5">•</span>
+                For educational purposes only
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 mt-0.5">•</span>
+                Not a substitute for medical advice
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 mt-0.5">•</span>
+                Consult a dermatologist for diagnosis
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 mt-0.5">•</span>
+                Your data is processed securely
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
