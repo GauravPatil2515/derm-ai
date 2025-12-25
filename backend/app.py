@@ -331,6 +331,7 @@ def get_analysis_details(analysis_id):
     """Get detailed analysis result by ID"""
     try:
         from models.skin_analysis import SkinAnalysisResult
+        import base64
         
         analysis = SkinAnalysisResult.query.filter_by(analysis_id=analysis_id).first()
         
@@ -339,15 +340,42 @@ def get_analysis_details(analysis_id):
                 'success': False,
                 'error': 'Analysis not found'
             }), 404
+        
+        # Parse the stored analysis data
+        analysis_data = json.loads(analysis.analysis_data) if analysis.analysis_data else {}
+        
+        # Get image preview as base64 if file exists
+        image_preview = None
+        if analysis.image_path and os.path.exists(analysis.image_path):
+            try:
+                with open(analysis.image_path, 'rb') as img_file:
+                    image_preview = base64.b64encode(img_file.read()).decode('utf-8')
+            except Exception as e:
+                logger.warning(f"Could not load image preview: {e}")
+        
+        # Build response in the format frontend expects
+        result = {
+            'id': analysis.analysis_id,
+            'condition': analysis.predicted_condition or 'Unknown',
+            'confidence': (analysis.confidence_score or 0) * 100,  # Convert to percentage
+            'timestamp': analysis.timestamp.isoformat(),
+            'image_preview': image_preview,
+            'primary_analysis': analysis_data.get('primary_analysis', {
+                'condition': analysis.predicted_condition or 'Unknown',
+                'confidence': (analysis.confidence_score or 0) * 100
+            }),
+            'report_metadata': analysis_data.get('report_metadata', {
+                'timestamp': analysis.timestamp.isoformat(),
+                'report_id': analysis.analysis_id,
+                'analysis_type': 'AI-Assisted Dermatological Assessment'
+            }),
+            'visual_explanation': analysis_data.get('visual_explanation', {}),
+            'detailed_analysis': analysis_data.get('detailed_analysis', {})
+        }
             
         return jsonify({
             'success': True,
-            'result': {
-                'id': analysis.analysis_id,
-                'timestamp': analysis.timestamp.isoformat(),
-                'analysis': json.loads(analysis.analysis_data) if analysis.analysis_data else {},
-                'image_url': f"/static/uploads/{analysis.image_filename}" if analysis.image_filename else None
-            }
+            'result': result
         })
         
     except Exception as e:
