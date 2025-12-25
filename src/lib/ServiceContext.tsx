@@ -23,25 +23,18 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     databaseConnected: false,
     uploadFolderReady: false,
   });
-  const [preloadTriggered, setPreloadTriggered] = useState(false);
 
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/health`);
+        const response = await fetch(API_BASE_URL + '/api/health');
         const data = await response.json();
-        const newStatus = {
+        setStatus({
           modelLoaded: data.model_loaded || false,
           modelLoading: data.model_loading || false,
           databaseConnected: data.database_connected || false,
           uploadFolderReady: data.upload_folder || false,
-        };
-        setStatus(newStatus);
-        
-        if (!preloadTriggered && newStatus.databaseConnected && !newStatus.modelLoaded && !newStatus.modelLoading) {
-          setPreloadTriggered(true);
-          preloadModel().catch(() => {});
-        }
+        });
       } catch (error) {
         console.error('Health check failed:', error);
         setStatus({
@@ -56,13 +49,11 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     checkHealth();
     const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
-  }, [preloadTriggered]);
+  }, []);
 
   const preloadModel = async () => {
     try {
-      console.log('Preloading AI model in background...');
-      await fetch(`${API_BASE_URL}/api/model-status`);
-      console.log('Model preload initiated');
+      await fetch(API_BASE_URL + '/api/model-status');
     } catch (error) {
       console.error('Model preload failed:', error);
     }

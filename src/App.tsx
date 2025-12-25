@@ -20,7 +20,7 @@ function App() {
     <AuthProvider>
       <ServiceProvider>
         <ToastProvider>
-          <Router basename="/derm-ai">
+          <Router basename={import.meta.env.BASE_URL}>
             <div className="min-h-screen bg-pink-50/30">
               <Navbar />
               <Routes>

@@ -13,7 +13,7 @@ def init_database():
         # Get the absolute path to the instance directory
         base_dir = os.path.abspath(os.path.dirname(__file__))
         instance_dir = os.path.join(base_dir, 'instance')
-        db_path = os.path.join(instance_dir, 'app.db')
+        db_path = os.path.join(instance_dir, 'skin_analysis.db')
         
         # Ensure instance directory exists with proper permissions
         os.makedirs(instance_dir, mode=0o755, exist_ok=True)
